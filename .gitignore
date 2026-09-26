@@ -1,0 +1,16 @@
+artifacts/
+**/runs/
+**/__pycache__/
+**/.pytest_cache/
+**/build/
+*.pyc
+*.pyd
+*.so
+*.pt
+*.zip
+*.log
+*.csv
+*.png
+*.pdf
+RL-MPC-LaneMerging-master/st_cy.c
+RL-MPC-LaneMerging-master/experiment_data/
