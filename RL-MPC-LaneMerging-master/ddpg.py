@@ -8,10 +8,11 @@ import functools
 from typing import List
 import logging
 from all.presets.continuous import ddpg
-from all.experiments import SingleEnvExperiment
+from all_windows_compat import PortableSingleEnvExperiment as SingleEnvExperiment
 from all.experiments.watch import GreedyAgent
 from all.environments import GymEnvironment
 from all.bodies.time import TimeFeature
+from legacy_gym_compat import make_legacy_gym_environment
 
 from config import Settings
 import control
@@ -31,7 +32,7 @@ class DDPGAgent(dqn.RLAgent):
         else:
             self.device = "cpu"
 
-        self.env = GymEnvironment(Settings.GYM_ENVIRONMENT, device=self.device)
+        self.env = make_legacy_gym_environment(Settings.GYM_ENVIRONMENT, device=self.device)
         self.agent = None
 
     @classmethod
