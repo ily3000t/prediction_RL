@@ -3,7 +3,7 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P2 environment contract accepted in bounded tests. Source supplied by the user
+Current stage: P3 diagnostics implemented; mechanism gate failed and P4 is paused. Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
 Original DDPG, reward and continuous jerk control are retained.
 
@@ -23,4 +23,8 @@ P2 adds an independent continuous-jerk execution audit without changing upstream
 training. See [P2 acceptance](reports/p02_environment_acceptance_20260926.md),
 [contract](docs/design/p02_environment_contract.md), and
 [audit commands](docs/runbooks/p02_environment_audit.md).
-P3 snapshot branching and neighbor-response tests are the next unimplemented gate.
+P3 exact replay passed, but its six diagnostic roots show no neighbor response;
+native snapshot continuation also failed parity. Read the
+[P3 findings](reports/p03_mechanism_diagnosis_20260926.md) and
+[diagnostic runbook](docs/runbooks/p03_mechanism_diagnostics.md).
+Do not start predictor training until the interaction-coverage decision is resolved.
