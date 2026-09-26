@@ -29,12 +29,20 @@ class Tee:
 
     def write(self, value):
         for stream in self.streams:
-            stream.write(value)
-            stream.flush()
+            if not stream.closed:
+                stream.write(value)
+                stream.flush()
+        return len(value)
 
     def flush(self):
         for stream in self.streams:
-            stream.flush()
+            if not stream.closed:
+                stream.flush()
+
+    def close(self):
+        # Imported loggers may retain this proxy through interpreter shutdown.
+        # The surrounding context owns the log, and we never own sys.stderr.
+        self.flush()
 
 
 def digest(path):
