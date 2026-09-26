@@ -1,0 +1,1 @@
+"""Upstream-preserving environment contracts."""
