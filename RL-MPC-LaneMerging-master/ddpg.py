@@ -8,7 +8,7 @@ import functools
 from typing import List
 import logging
 from all.presets.continuous import ddpg
-from all.experiments import SingleEnvExperiment
+from all_windows_compat import PortableSingleEnvExperiment as SingleEnvExperiment
 from all.experiments.watch import GreedyAgent
 from all.environments import GymEnvironment
 from all.bodies.time import TimeFeature
