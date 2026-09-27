@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from audit_environment import sha, write
 from prediction_rl.envs.upstream import upstream_session, validate_seed
+from prediction_rl.data.geometric_roots import validate_targets
 from prediction_rl.data.branching import (
     ReplayBrancher, RootUnavailable, native_snapshot_probe, response_summary, restore_rng,
 )
@@ -41,19 +42,30 @@ def environment_metadata():
 def load_plan(path):
     import math
     plan = json.loads(Path(path).read_text(encoding='utf-8'))
-    if not isinstance(plan, dict) or set(plan) != PLAN_KEYS or plan['schema_version'] != 1:
+    if not isinstance(plan, dict) or type(plan.get('schema_version')) is not int or plan['schema_version'] not in (1, 2):
         raise ValueError('Unknown/missing P3 fields or schema')
+    expected = PLAN_KEYS if plan['schema_version'] == 1 else (
+        PLAN_KEYS - {'root_prefix_steps'} | {'root_targets', 'discovery_max_steps', 'native_probe_enabled'})
+    if set(plan) != expected:
+        raise ValueError('Unknown/missing P3 fields')
     seeds = plan['simulator_seeds']
     if not isinstance(seeds, list) or not 1 <= len(seeds) <= 3 or len(set(seeds)) != len(seeds):
         raise ValueError('Use one to three distinct predeclared development seeds')
     for seed in seeds:
         validate_seed(seed)
-    prefixes = plan['root_prefix_steps']
-    if not isinstance(prefixes, list) or not 1 <= len(prefixes) <= 2 or len(set(prefixes)) != len(prefixes):
-        raise ValueError('Use at most two distinct fixed roots per seed')
-    for value in prefixes:
-        if type(value) is not int or not 0 <= value <= 100:
-            raise ValueError('Root prefix must be an integer in [0,100]')
+    if plan['schema_version'] == 1:
+        prefixes = plan['root_prefix_steps']
+        if not isinstance(prefixes, list) or not 1 <= len(prefixes) <= 2 or len(set(prefixes)) != len(prefixes):
+            raise ValueError('Use at most two distinct fixed roots per seed')
+        for value in prefixes:
+            if type(value) is not int or not 0 <= value <= 100:
+                raise ValueError('Root prefix must be an integer in [0,100]')
+    else:
+        validate_targets(plan['root_targets'])
+        if type(plan['discovery_max_steps']) is not int or not 1 <= plan['discovery_max_steps'] <= 250:
+            raise ValueError('Geometric discovery must be bounded at 250 steps')
+        if plan['native_probe_enabled'] is not False:
+            raise ValueError('Unaccepted native snapshot probe is disabled in this coverage study')
     if plan['probe_fractions'] != [0.0, 0.25, 0.5, 0.75, 1.0]:
         raise ValueError('This diagnostic freezes five equally spaced bound-derived probes')
     if type(plan['horizon_steps']) is not int or not 1 <= plan['horizon_steps'] <= 50:
@@ -97,15 +109,29 @@ def run_worker(args, plan):
                 report['probe_jerks'] = probes
                 report['intervention_s'] = settings.TICK_LENGTH
                 report['horizon_s'] = settings.TICK_LENGTH * plan['horizon_steps']
-                for prefix_steps in plan['root_prefix_steps']:
+                if plan['schema_version'] == 1:
+                    planned_roots = [{'prefix_steps': step} for step in plan['root_prefix_steps']]
+                else:
+                    discovery = manager.discover_lane_roots(plan['root_targets'], plan['discovery_max_steps'],
+                                                           plan['prefix_jerk'])
+                    write(output / 'root_discovery.json', discovery)
+                    report['discovery'] = discovery
+                    planned_roots = discovery['targets']
+                for planned_root in planned_roots:
+                    prefix_steps = planned_root['prefix_steps']
+                    if prefix_steps is None:
+                        report['roots'].append({**planned_root, 'status': 'unavailable'})
+                        continue
                     prefix = [plan['prefix_jerk']] * prefix_steps
                     try:
                         root = manager.capture(prefix)
                     except RootUnavailable as error:
-                        report['roots'].append({'prefix_steps': prefix_steps, 'status': 'unavailable', 'reason': str(error)})
+                        report['roots'].append({**planned_root, 'status': 'unavailable', 'reason': str(error)})
                         continue
+                    if 'selection' in planned_root and root.traffic != planned_root['selection']['traffic']:
+                        raise AssertionError('Geometrically selected root differs after exact prefix replay')
                     branches, repeated = {}, {}
-                    root_result = {'prefix_steps': prefix_steps, 'status': 'complete',
+                    root_result = {**planned_root, 'status': 'complete',
                                    'signature': root.signature, 'prefix_trace_hash': root.prefix_trace_hash,
                                    'root_traffic': root.traffic}
                     for index in list(range(5)) + list(reversed(range(5))):
@@ -131,7 +157,8 @@ def run_worker(args, plan):
                     report['roots'].append(root_result)
                     print(f"[p3] seed={args.seed} root={prefix_steps} repeat_exact=true neighbor_response={root_result['neighbor_response_detected']}", flush=True)
                     # One native probe, with the same exact root/continuation as replay.
-                    if args.seed == plan['simulator_seeds'][0] and prefix_steps == plan['root_prefix_steps'][-1]:
+                    if (plan['schema_version'] == 1 and args.seed == plan['simulator_seeds'][0]
+                            and prefix_steps == plan['root_prefix_steps'][-1]):
                         manager.close()
                         restore_rng(manager.initial_rng)
                         control.delay = manager.initial_delay
@@ -207,7 +234,8 @@ def parent(args, plan):
         affected_seeds = [c['seed'] for c in children if any(r.get('neighbor_response_detected') for r in c['roots'])]
         report.update(status='complete', children=children,
                       engineering_gate=bool(complete) and all(r['repeated_reverse_order_exact'] for r in complete),
-                      expected_root_count=len(plan['simulator_seeds']) * len(plan['root_prefix_steps']),
+                      expected_root_count=len(plan['simulator_seeds']) * len(
+                          plan['root_prefix_steps'] if plan['schema_version'] == 1 else plan['root_targets']),
                       evaluated_root_count=len(complete),
                       response_root_count=sum(r['neighbor_response_detected'] for r in complete),
                       response_seeds=affected_seeds)
