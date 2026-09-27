@@ -51,7 +51,8 @@ def read_ego_progress():
             'lane_length_m': float(traci.lane.getLength(lane)), 'traffic': traffic_snapshot()}
 
 
-def scan_lane_roots(env, targets, max_steps, jerk, read_progress=read_ego_progress):
+def scan_lane_roots(env, targets, max_steps, jerk, read_progress=read_ego_progress,
+                    action_source=None, initial_observation=None):
     """First qualifying nonterminal state per target. No probe results as input.
 
     env has already been reset. The original prefix is not altered at targets.
@@ -61,6 +62,8 @@ def scan_lane_roots(env, targets, max_steps, jerk, read_progress=read_ego_progre
     if type(max_steps) is not int or not 0 <= max_steps <= 250:
         raise ValueError('Discovery budget must be 0..250 steps')
     selected = {}
+    prefix_actions = []
+    observation = initial_observation
     visited = []
     stop_reason = 'discovery_budget_exhausted'
     for step in range(max_steps + 1):
@@ -77,19 +80,26 @@ def scan_lane_roots(env, targets, max_steps, jerk, read_progress=read_ego_progre
                     'selection': deepcopy(progress), 'target_position_m': position,
                     'overshoot_m': progress['lane_position_m'] - position,
                     'selection_rule': 'first_nonterminal_lane_threshold_crossing_v1'}
+                if action_source is not None:
+                    selected[target['id']]['prefix_actions'] = list(prefix_actions)
         if len(selected) == len(targets):
             stop_reason = 'all_targets_reached'
             break
         if step == max_steps:
             break
-        _, _, done, info = env.step(np.array([jerk], dtype=env.action_space.dtype))
+        requested = jerk if action_source is None else action_source(observation, step)
+        observation, _, done, info = env.step(np.array([requested], dtype=env.action_space.dtype))
+        prefix_actions.append(float(requested))
         if done:
             stop_reason = 'episode_terminated_before_remaining_targets'
             break
-    return {
+    result = {
         'targets': [selected.get(target['id'], {
             'target': deepcopy(target), 'prefix_steps': None, 'reason': stop_reason,
             'selection_rule': 'first_nonterminal_lane_threshold_crossing_v1'})
                     for target in targets],
         'visited_lane_ids': visited, 'stop_reason': stop_reason,
     }
+    if action_source is not None:
+        result['reference_actions'] = prefix_actions
+    return result

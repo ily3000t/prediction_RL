@@ -137,14 +137,17 @@ class ReplayBrancher:
         return ReplayRoot(prefix, root_signature(self.env), fingerprint(trace),
                           deepcopy(traffic_snapshot()), self.owner)
 
-    def discover_lane_roots(self, targets, max_steps, jerk):
+    def discover_lane_roots(self, targets, max_steps, jerk, policy=None):
         from prediction_rl.data.geometric_roots import scan_lane_roots, target_position, validate_targets
         import traci
         validate_targets(targets)
-        self._fresh()
+        observation = self._fresh()
         for target in targets:
             target_position(target, traci.lane.getLength(target['lane_id']))
-        return scan_lane_roots(self.env, targets, max_steps, jerk)
+        if policy is not None:
+            policy.bind(self.env)
+        return scan_lane_roots(self.env, targets, max_steps, jerk,
+                               action_source=policy, initial_observation=observation)
 
     def restore(self, root):
         if root.owner is not self.owner:

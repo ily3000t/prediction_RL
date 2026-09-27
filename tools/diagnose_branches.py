@@ -42,10 +42,12 @@ def environment_metadata():
 def load_plan(path):
     import math
     plan = json.loads(Path(path).read_text(encoding='utf-8'))
-    if not isinstance(plan, dict) or type(plan.get('schema_version')) is not int or plan['schema_version'] not in (1, 2):
+    if not isinstance(plan, dict) or type(plan.get('schema_version')) is not int or plan['schema_version'] not in (1, 2, 3):
         raise ValueError('Unknown/missing P3 fields or schema')
     expected = PLAN_KEYS if plan['schema_version'] == 1 else (
         PLAN_KEYS - {'root_prefix_steps'} | {'root_targets', 'discovery_max_steps', 'native_probe_enabled'})
+    if plan['schema_version'] == 3:
+        expected = expected - {'prefix_jerk'} | {'reference_policy'}
     if set(plan) != expected:
         raise ValueError('Unknown/missing P3 fields')
     seeds = plan['simulator_seeds']
@@ -72,8 +74,11 @@ def load_plan(path):
         raise ValueError('Bounded horizon must be 1..50 steps')
     if type(plan['intervention_steps']) is not int or plan['intervention_steps'] != 1:
         raise ValueError('v1 intervention lasts one original decision period')
-    for key in ('prefix_jerk', 'continuation_jerk', 'response_speed_threshold_mps',
-                'response_position_threshold_m', 'worker_wall_limit_s'):
+    numeric_keys = ['continuation_jerk', 'response_speed_threshold_mps',
+                    'response_position_threshold_m', 'worker_wall_limit_s']
+    if plan['schema_version'] != 3:
+        numeric_keys.append('prefix_jerk')
+    for key in numeric_keys:
         value = plan[key]
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
             raise ValueError(f'Invalid finite number: {key}')
@@ -84,6 +89,18 @@ def load_plan(path):
     config = Path(plan['upstream_config'])
     if config.is_absolute() or '..' in config.parts:
         raise ValueError('Use a project-relative upstream config')
+    if plan['schema_version'] == 3:
+        policy = plan['reference_policy']
+        if (not isinstance(policy, dict) or set(policy) != {'adapter', 'checkpoint', 'sha256'}
+                or policy['adapter'] != 'author_ddpg_greedy_timefeature_v1'):
+            raise ValueError('Unknown reference policy contract')
+        if not isinstance(policy['checkpoint'], str):
+            raise ValueError('Expected relative checkpoint path')
+        checkpoint = Path(policy['checkpoint'])
+        if checkpoint.is_absolute() or '..' in checkpoint.parts or checkpoint.name != 'policy.pt':
+            raise ValueError('Use a project-relative author policy.pt')
+        if not isinstance(policy['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', policy['sha256']):
+            raise ValueError('Reference policy requires a frozen SHA256')
     return plan
 
 
@@ -100,11 +117,19 @@ def run_worker(args, plan):
         with upstream_session(ROOT / 'RL-MPC-LaneMerging-master', ROOT / plan['upstream_config'], args.seed) as settings:
             write(output / 'resolved_config.json', settings.export_settings())
             import control
+            policy = None
+            if plan['schema_version'] == 3:
+                from prediction_rl.data.reference_policy import AuthorDDPGReference
+                reference = plan['reference_policy']
+                policy = AuthorDDPGReference(ROOT / reference['checkpoint'], reference['sha256'],
+                                             'cuda' if settings.CUDA else 'cpu')
+                report['reference_policy'] = reference
+                report['reference_policy_device'] = policy.device
             manager = ReplayBrancher()
             try:
                 low, high = settings.MINIMUM_NEGATIVE_JERK, settings.MAXIMUM_POSITIVE_JERK
                 probes = [low + f * (high - low) for f in plan['probe_fractions']]
-                if not low <= plan['prefix_jerk'] <= high or not low <= plan['continuation_jerk'] <= high:
+                if not low <= plan.get('prefix_jerk', 0.0) <= high or not low <= plan['continuation_jerk'] <= high:
                     raise ValueError('Prefix/continuation outside upstream jerk bounds')
                 report['probe_jerks'] = probes
                 report['intervention_s'] = settings.TICK_LENGTH
@@ -113,7 +138,15 @@ def run_worker(args, plan):
                     planned_roots = [{'prefix_steps': step} for step in plan['root_prefix_steps']]
                 else:
                     discovery = manager.discover_lane_roots(plan['root_targets'], plan['discovery_max_steps'],
-                                                           plan['prefix_jerk'])
+                                                           plan.get('prefix_jerk'), policy=policy)
+                    if policy is not None:
+                        discovery['upstream_control_parity_checked_steps'] = policy.checked_steps
+                        repeated_discovery = manager.discover_lane_roots(
+                            plan['root_targets'], plan['discovery_max_steps'], None, policy=policy)
+                        repeated_discovery['upstream_control_parity_checked_steps'] = policy.checked_steps
+                        if discovery != repeated_discovery:
+                            raise AssertionError('Repeated DDPG reference discovery differs')
+                        discovery['repeated_discovery_exact'] = True
                     write(output / 'root_discovery.json', discovery)
                     report['discovery'] = discovery
                     planned_roots = discovery['targets']
@@ -122,7 +155,10 @@ def run_worker(args, plan):
                     if prefix_steps is None:
                         report['roots'].append({**planned_root, 'status': 'unavailable'})
                         continue
-                    prefix = [plan['prefix_jerk']] * prefix_steps
+                    prefix = (planned_root['prefix_actions'] if policy is not None
+                              else [plan['prefix_jerk']] * prefix_steps)
+                    if len(prefix) != prefix_steps:
+                        raise AssertionError('Recorded reference prefix length mismatch')
                     try:
                         root = manager.capture(prefix)
                     except RootUnavailable as error:
@@ -205,6 +241,11 @@ def parent(args, plan):
               'optimizer_seed': None, 'predictor_checkpoint_hash': None,
               'policy_checkpoint_hash': None, 'dataset_manifest_hash': None,
               'backend': ReplayBrancher.backend}
+    if plan['schema_version'] == 3:
+        from prediction_rl.data.reference_policy import verify_checkpoint
+        reference = plan['reference_policy']
+        verify_checkpoint(ROOT / reference['checkpoint'], reference['sha256'])
+        report['policy_checkpoint_hash'] = reference['sha256']
     write(output / 'resolved_diagnostic_config.json', plan)
     (output / 'working_tree.diff').write_text(git('diff', 'HEAD', '--'), encoding='utf-8')
     paths = [*ROOT.joinpath('src').rglob('*.py'), *ROOT.joinpath('tools').glob('*.py'),
