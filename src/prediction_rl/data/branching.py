@@ -149,6 +149,26 @@ class ReplayBrancher:
         return scan_lane_roots(self.env, targets, max_steps, jerk,
                                action_source=policy, initial_observation=observation)
 
+    def capture_with_history(self, prefix, history_steps=11):
+        """Exact prefix replay plus read-only extended history; no future steps."""
+        from collections import deque
+        from prediction_rl.data.merge_geometry import read_extended_traffic
+        if type(history_steps) is not int or not 1 <= history_steps <= 64:
+            raise ValueError('Invalid bounded history length')
+        prefix = tuple(float(x) for x in prefix)
+        self._fresh()
+        history = deque([read_extended_traffic()], maxlen=history_steps)
+        trace = []
+        for action in prefix:
+            step = rollout(self.env, [action])
+            trace.extend(step)
+            if step[-1]['done']:
+                raise RootUnavailable('History root reaches episode termination')
+            history.append(read_extended_traffic())
+        root = ReplayRoot(prefix, root_signature(self.env), fingerprint(trace),
+                          deepcopy(traffic_snapshot()), self.owner)
+        return root, list(history)
+
     def restore(self, root):
         if root.owner is not self.owner:
             raise ValueError('Snapshot belongs to a different run/manager')
