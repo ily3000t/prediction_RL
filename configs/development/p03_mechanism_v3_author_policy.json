@@ -1,0 +1,24 @@
+{
+  "schema_version": 3,
+  "upstream_config": "RL-MPC-LaneMerging-master/configs/train_default_1.json",
+  "simulator_seeds": [0, 1, 100],
+  "root_targets": [
+    {"id": "approach", "lane_id": "ramp_0", "reference": "before_end_m", "value": 20.0},
+    {"id": "internal_mid", "lane_id": ":mergenode_1_0", "reference": "fraction", "value": 0.5},
+    {"id": "downstream", "lane_id": "highwayahead_0", "reference": "from_start_m", "value": 5.0}
+  ],
+  "discovery_max_steps": 250,
+  "native_probe_enabled": false,
+  "reference_policy": {
+    "adapter": "author_ddpg_greedy_timefeature_v1",
+    "checkpoint": "RL-MPC-LaneMerging-master/pretrained_models/ddpg_default1_extended/policy.pt",
+    "sha256": "548663282e348356f658fe8204b44b7ad589d935b05a1f18fc3d8927b3dd7750"
+  },
+  "probe_fractions": [0.0, 0.25, 0.5, 0.75, 1.0],
+  "intervention_steps": 1,
+  "horizon_steps": 25,
+  "continuation_jerk": 0.0,
+  "response_speed_threshold_mps": 0.05,
+  "response_position_threshold_m": 0.1,
+  "worker_wall_limit_s": 300
+}
