@@ -3,8 +3,8 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P4c ordinary/conditional predictor interfaces passed bounded
-offline validation; next is P4d label alignment and masked training interfaces.
+Current stage: P4d label alignment, masked loss and bounded training/resume
+interfaces passed; next is P4e formal collection/training protocol design and review.
 Full P4 and formal training readiness are
 not yet complete.
 Source supplied by the user
@@ -58,3 +58,11 @@ checkpoints are explicitly UNTRAINED, not prediction-effect evidence or policies
 See [interface design](docs/design/p04_predictor_interface.md),
 [P4c acceptance](reports/p04c_predictor_interface_acceptance_20260927.md) and
 [offline audit command](docs/runbooks/p04_predictor_interfaces.md).
+
+P4d aligns physical targets by root actor IDs, enforces episode splits and trains
+each member separately with an explicit masked trajectory objective. A two-step
+CPU smoke on the same nine development roots passes exact model/Adam/inference
+resume. These smoke weights are not formally trained or approved for control.
+See [supervision design](docs/design/p04_masked_training.md),
+[P4d acceptance](reports/p04d_masked_training_acceptance_20260927.md) and
+[bounded audit command](docs/runbooks/p04_masked_training.md).
