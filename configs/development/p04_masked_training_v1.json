@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_interface_report": "artifacts/p4/p4_interface_v1_01/report.json",
+  "source_interface_sha256": "2a668c9ee0a49a114e2a840ebc7bbcecfae982f34491ab26778bf1e27623fda4",
+  "source_history_report": "artifacts/p4/p4_history_v1_01/report.json",
+  "source_history_sha256": "89d4f73676a1fa6816421731cc30ee4d6f379d3e6d971879ccfdda20cfbb6c8c",
+  "source_label_report": "artifacts/p4/p4_labels_v1_01/report.json",
+  "source_label_sha256": "7f4e239d40872262189bf527b366764bd818f69c680e8debe252b595bcbd27c2",
+  "member_initialization_seeds": [3101,3102,3103],
+  "model": {
+    "schema_version": 1,
+    "neighbor_capacity": 12,
+    "history_steps": 11,
+    "horizon_steps": 25,
+    "tick_s": 0.2,
+    "hidden_dim": 64,
+    "attention_heads": 4,
+    "ensemble_size": 3,
+    "jerk_min": -5.0,
+    "jerk_max": 5.0
+  },
+  "torch_threads": 1,
+  "optimizer_steps_per_path": 2,
+  "training_split": "development"
+}
