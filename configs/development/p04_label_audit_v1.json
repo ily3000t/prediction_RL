@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "source_report": "artifacts/p3/p3_policy_v3_01/report.json",
+  "source_report_sha256": "de70e24603f1647769e557c2649a27e845e34b581139f8900ccec2c138bec4ca",
+  "horizon_steps": 25,
+  "tick_s": 0.2,
+  "split": "development",
+  "training_ready": false
+}
