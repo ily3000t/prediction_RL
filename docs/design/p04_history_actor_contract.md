@@ -80,6 +80,9 @@ candidate-independent proxy selector, not a learned or per-candidate selector.
 Physical features: XY relative to fixed root ego origin, speed, acceleration,
 merge-end progress, length, width and three group one-hot fields. Raw SI units
 are retained; train-only normalization is a later model concern.
+Dynamic IDs, mandatory role maps and root_actor_metrics are audit metadata,
+not unbounded additional model channels. A predictor should consume only the
+named fixed arrays/masks; no future label pack is accepted by this adapter.
 
 Summary groups: ramp (including ramp internal lane), main approach (including
 main internal lane), main downstream. At each history time, summarize observed

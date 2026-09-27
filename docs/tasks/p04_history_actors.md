@@ -19,3 +19,10 @@ pilot; small result report separately. Preserve failed pilot evidence. Merge
 only this verified slice; do not mark all P4 complete or push unresolved upstream.
 
 Stop on geometry/parity/input failure. Handoff: docs/runbooks/p04_history_actors.md.
+
+Actual result: implementation 88b4da5; 129 tests passed; clean bounded pilot
+p4_history_v1_01 completed in 59.67 seconds. All nine roots match P3, all repeated
+histories/encodings match and all 45 candidate labels join. Independent checks
+verified omitted counts over 99 frames and selected actor IDs in every label
+family. Report: reports/p04b_history_actor_acceptance_20260927.md.
+This slice can merge; next is P4c model interfaces, not formal training.

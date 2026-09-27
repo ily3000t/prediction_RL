@@ -18,3 +18,9 @@ and r0.json..r2.json input/history packs with links/hashes to existing labels.
 Inspect history_actor_gate and all nine root checks. formal_training_ready
 remains false even if the pilot succeeds. Unknown geometry or changed replay
 must fail explicitly; do not discard a seed/root to obtain a pass.
+
+Completed evidence: artifacts/p4/p4_history_v1_01/report.json; clean code
+88b4da5; 59.67 seconds; history_actor_gate=true, 9 roots, 45 candidate labels
+joined, 129 tests passed. All roots have 11 actual history frames; 12 neighbors
+selected per root and 3–12 omitted neighbors summarized. formal_training_ready
+is still false. See reports/p04b_history_actor_acceptance_20260927.md.
