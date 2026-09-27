@@ -20,3 +20,8 @@ the fixed actor adapter is not implemented and formal splits are not approved.
 Do not use this fixture as a formal training/test dataset or count repeats twice.
 
 See docs/design/p04_data_contract.md for masks and the next implementation slices.
+
+Completed run: artifacts/p4/p4_labels_v1_01/report.json, clean code 028f813.
+All 3 episodes / 9 roots / 45 candidates passed label validation; 109 tests
+passed. Original event counts remain 20 arrival, 8 collision, 17 nonterminal.
+See reports/p04a_label_contract_acceptance_20260927.md. No new simulator run.

@@ -20,3 +20,9 @@ candidate family or inconsistent metadata. Never drop bad examples to pass.
 
 Handoff: docs/runbooks/p04_label_audit.md. Next is P4b history/actor adapter, not
 formal collection or training. Implementation boundary is in the design document.
+
+Actual acceptance: code 028f813, 109 tests passed; clean offline audit
+artifacts/p4/p4_labels_v1_01 passed for all 45 candidates. training_ready remains
+false for documented missing history, actor adapter and approved formal splits.
+Summary: reports/p04a_label_contract_acceptance_20260927.md. This slice can merge;
+full P4 completion is not claimed.

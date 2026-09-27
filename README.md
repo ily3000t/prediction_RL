@@ -3,8 +3,9 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P3 v3 development diagnostics passed; next is P4 design review,
-not formal collection/training. Source supplied by the user
+Current stage: P4a label/split contract passed; next is P4b history and actor
+adapter implementation. Full P4 and training readiness are not yet complete.
+Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
 Original DDPG, reward and continuous jerk control are retained.
 
@@ -35,3 +36,9 @@ disabled. Read the
 [diagnostic runbook](docs/runbooks/p03_mechanism_diagnostics.md).
 This verifies simulator mechanism coverage, not prediction or policy improvement.
 Formal datasets and training still require the subsequent design/acceptance steps.
+
+P4a validates all 45 existing development branches with episode-group splits and
+explicit future/event masks. It does not invent missing history or train models.
+See [P4 data design](docs/design/p04_data_contract.md),
+[label acceptance](reports/p04a_label_contract_acceptance_20260927.md) and
+[offline audit runbook](docs/runbooks/p04_label_audit.md).
