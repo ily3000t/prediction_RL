@@ -53,7 +53,7 @@ The mechanism gate is independent of engineering validity. A valid experiment
 with no neighbor response finishes status=complete, mechanism_gate=false.
 Do not turn a negative mechanism result into a code error or delete it.
 
-## Current stage state
+## Historical coverage and current stage state
 
 P3 v1 has valid replay diagnostics but no observed neighbor response across
 its six roots. V2 adds first nonterminal lane-position threshold crossings
@@ -63,6 +63,17 @@ unreached targets remain unavailable, with no substitution. The selector is
 independent of response/reward outcomes; original actor/control settings remain.
 
 V2 evaluates all nine targets, with response at three roots in only seed 100.
-The predeclared gate still requires two seeds, so P4 remains paused. This is
+At that version, the predeclared gate still required two seeds, so P4 was paused. This is
 limited coverage, not proof of an absent mechanism. See
 reports/p03_merge_region_diagnosis_20260927.md. Native save/load remains disabled.
+
+V3 replaces only the discovery prefix controller with a hash-pinned author DDPG.
+It retains GreedyAgent and TimeFeature, validates every action against original
+get_control, verifies no RNG consumption and repeats discovery independently.
+Saved continuous jerk prefixes, not fresh policy calls, are replayed for every
+candidate. After reaching a root, the candidate and zero-jerk continuation are
+unchanged. No ST takeover or new policy action space is introduced.
+
+V3 passed: 9/9 roots, 5 response roots in three seeds; all discovery/branch parity
+checks exact. P4 design review can proceed. This is not model effectiveness or
+formal data sufficiency. See reports/p03_author_policy_acceptance_20260927.md.

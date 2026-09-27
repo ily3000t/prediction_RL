@@ -66,3 +66,17 @@ Acceptance record: reports/p03_merge_region_diagnosis_20260927.md.
 P4 remains paused. P3 branch remains unmerged. Next review may authorize a new
 author-policy reference-trajectory diagnostic; it is not implemented here.
 Do not change the response gate or reuse the current run ID.
+
+## V3 continuation and P3 acceptance — 2026-09-27
+
+User approved author-policy reference coverage. Implementation fde9d81 adds a
+hash-pinned actor, unchanged author time feature/control parity checks, RNG
+checks, repeated discovery and recorded prefix replay. V1/v2 plans are untouched.
+87 tests passed. Clean run artifacts/p3/p3_policy_v3_01 completed in 220.03 seconds:
+9/9 roots, 90 branch rollouts including repeats, engineering and mechanism PASS,
+5 responsive roots covering seeds 0, 1, 100. No training, ST or native save/load.
+
+Current acceptance: reports/p03_author_policy_acceptance_20260927.md.
+Earlier v1/v2 pauses remain historical evidence, not current blockers. P3 can be
+merged non-squashed after final review; P4 design review is next. Formal collection
+and model training still require their own design approval and user execution.

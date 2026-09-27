@@ -1,6 +1,10 @@
 # P3 bounded diagnostic runbook
 
-Current result: mechanism gate failed. This command reproduces the bounded
+Current result: v3 passed the development mechanism gate; see the last section.
+
+## V1 historical diagnostic
+
+V1 result: mechanism gate failed. This command reproduces the bounded
 diagnostic, not a recommendation to repeatedly rerun until a favorable result.
 Do not start a formal dataset or predictor training.
 
@@ -62,3 +66,26 @@ response_root_count=3/9, response_seeds=[100]. All nine roots were evaluated.
 77 unit/regression tests passed. Do not interpret successful exit as approval
 to start P4. See reports/p03_merge_region_diagnosis_20260927.md for interpretation
 and the proposed, not yet authorized, author-policy coverage diagnostic.
+
+## V3 author-policy coverage (approved and completed)
+
+~~~powershell
+python tools/diagnose_branches.py --config configs/development/p03_mechanism_v3_author_policy.json --run-id local_p3_policy_01
+~~~
+
+Use a new short ID. Do not overwrite p3_policy_v3_01. The config pins the author
+policy.pt by SHA256 and retains the v2 seeds/targets/probes/horizon/thresholds.
+Only discovery uses DDPG; candidate continuations still use zero jerk. No training.
+Per seed: two discoveries of at most 250 steps each; up to three roots with five
+probes plus reverse-order repeats, each capped at 25 steps. Worker watchdog 300s.
+
+Code commit fde9d81; 87 tests passed. Completed evidence:
+artifacts/p3/p3_policy_v3_01/report.json, 220.03 seconds, clean launch.
+status=complete; engineering_gate=true; mechanism_gate=true;
+evaluated_root_count=9; response_root_count=5; response_seeds=[0,1,100].
+Discovery action prefixes and per-step upstream-control parity counts are stored
+in root_discovery.json. Both discoveries and all candidate repeats match exactly.
+
+The next stage is P4 design review, NOT formal model training. Native snapshots
+remain disabled. Read reports/p03_author_policy_acceptance_20260927.md before
+interpreting candidate collisions as any policy's performance.

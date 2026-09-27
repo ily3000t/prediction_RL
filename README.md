@@ -3,7 +3,8 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P3 diagnostics implemented; mechanism gate failed and P4 is paused. Source supplied by the user
+Current stage: P3 v3 development diagnostics passed; next is P4 design review,
+not formal collection/training. Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
 Original DDPG, reward and continuous jerk control are retained.
 
@@ -24,10 +25,13 @@ training. See [P2 acceptance](reports/p02_environment_acceptance_20260926.md),
 [contract](docs/design/p02_environment_contract.md), and
 [audit commands](docs/runbooks/p02_environment_audit.md).
 P3 exact replay passed. V1 found no neighbor response; v2 neutral merge-region
-coverage found responses in 3/9 roots, all in one seed, so the unchanged
-two-seed mechanism gate still fails. Native snapshot continuation also failed
-parity and remains disabled. Read the
+coverage found responses in 3/9 roots in one seed. V3 uses the pinned author DDPG
+reference and finds responses in 5/9 roots across all three seeds, passing the
+unchanged mechanism gate. Native snapshot continuation failed parity and remains
+disabled. Read the
 [P3 findings](reports/p03_mechanism_diagnosis_20260926.md) and
 [v2 merge-region findings](reports/p03_merge_region_diagnosis_20260927.md), plus the
+[v3 acceptance](reports/p03_author_policy_acceptance_20260927.md) and
 [diagnostic runbook](docs/runbooks/p03_mechanism_diagnostics.md).
-Do not start predictor training until the interaction-coverage decision is resolved.
+This verifies simulator mechanism coverage, not prediction or policy improvement.
+Formal datasets and training still require the subsequent design/acceptance steps.
