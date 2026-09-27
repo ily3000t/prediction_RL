@@ -3,8 +3,9 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P4b history/actor adapter passed bounded replay validation;
-next is P4c predictor interfaces. Full P4 and formal training readiness are
+Current stage: P4c ordinary/conditional predictor interfaces passed bounded
+offline validation; next is P4d label alignment and masked training interfaces.
+Full P4 and formal training readiness are
 not yet complete.
 Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
@@ -49,3 +50,11 @@ roles and masked omitted-actor summaries without changing original replay.
 See [input contract](docs/design/p04_history_actor_contract.md),
 [P4b acceptance](reports/p04b_history_actor_acceptance_20260927.md) and
 [bounded pilot command](docs/runbooks/p04_history_actors.md).
+
+P4c adds independent 64-wide masked GRU/interaction encoders and ordinary versus
+action-conditioned single-trajectory heads, each with three members. The nine
+existing development roots pass batching and strict checkpoint tests. These
+checkpoints are explicitly UNTRAINED, not prediction-effect evidence or policies.
+See [interface design](docs/design/p04_predictor_interface.md),
+[P4c acceptance](reports/p04c_predictor_interface_acceptance_20260927.md) and
+[offline audit command](docs/runbooks/p04_predictor_interfaces.md).
