@@ -3,8 +3,9 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P4a label/split contract passed; next is P4b history and actor
-adapter implementation. Full P4 and training readiness are not yet complete.
+Current stage: P4b history/actor adapter passed bounded replay validation;
+next is P4c predictor interfaces. Full P4 and formal training readiness are
+not yet complete.
 Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
 Original DDPG, reward and continuous jerk control are retained.
@@ -42,3 +43,9 @@ explicit future/event masks. It does not invent missing history or train models.
 See [P4 data design](docs/design/p04_data_contract.md),
 [label acceptance](reports/p04a_label_contract_acceptance_20260927.md) and
 [offline audit runbook](docs/runbooks/p04_label_audit.md).
+
+P4b adds exact observed history, 12 neighbor slots (ego separate), mandatory
+roles and masked omitted-actor summaries without changing original replay.
+See [input contract](docs/design/p04_history_actor_contract.md),
+[P4b acceptance](reports/p04b_history_actor_acceptance_20260927.md) and
+[bounded pilot command](docs/runbooks/p04_history_actors.md).

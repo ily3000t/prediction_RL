@@ -70,7 +70,11 @@ can be informative: downstream learning/evaluation must report event-mask covera
 and not interpret missing labels as negatives. A competing-risk formulation or
 new ranking target requires a separate documented design.
 
-## History and actor input design (next implementation, not yet available)
+## Initial history and actor design (subsequently implemented in P4b)
+
+The following records the initial P4a design. P4b now implements the explicit
+contract in p04_history_actor_contract.md; its report records bounded replay
+acceptance. P4a artifacts themselves still have history=null and remain unchanged.
 
 Working pilot design: 11 frames at 0.2-second spacing spanning 2.0 seconds,
 including the root. Early history and actor absence carry explicit masks, never
