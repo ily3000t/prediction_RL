@@ -56,4 +56,13 @@ Do not turn a negative mechanism result into a code error or delete it.
 ## Current stage state
 
 P3 v1 has valid replay diagnostics but no observed neighbor response across
-its six roots. P4 is paused. See reports/p03_mechanism_diagnosis_20260926.md.
+its six roots. V2 adds first nonterminal lane-position threshold crossings
+along the fixed zero-jerk reference; selection finishes before probe evaluation.
+Every selected root must match discovery traffic after replay. Terminal or
+unreached targets remain unavailable, with no substitution. The selector is
+independent of response/reward outcomes; original actor/control settings remain.
+
+V2 evaluates all nine targets, with response at three roots in only seed 100.
+The predeclared gate still requires two seeds, so P4 remains paused. This is
+limited coverage, not proof of an absent mechanism. See
+reports/p03_merge_region_diagnosis_20260927.md. Native save/load remains disabled.

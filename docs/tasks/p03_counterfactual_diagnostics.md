@@ -49,3 +49,20 @@ Reproduction command:
 python tools/diagnose_branches.py --config configs/development/p03_mechanism_v1.json --run-id local_p3_01
 
 Use a new ID. See runbook; a rerun alone does not resolve the mechanism gap.
+
+## V2 continuation — 2026-09-27
+
+Scope: result-independent geometric root coverage, not altered scenarios or
+replacement seeds. Implemented lane-position discovery with strict schema,
+bounded budget, unavailable-root reporting and exact discovery/replay equality.
+Original v1 shared experimental parameters remain identical (regression tested).
+
+Implementation commit: 78d4bb1. Tests: 77 passed. Clean bounded SUMO run:
+artifacts/p3/p3_merge_v2_01/report.json, 249.32 seconds, 9/9 roots and 90 rollouts
+including repeats. Engineering PASS; response at 3/9 roots, all in seed 100;
+unchanged two-seed mechanism gate FAIL. No native snapshot, training or push.
+
+Acceptance record: reports/p03_merge_region_diagnosis_20260927.md.
+P4 remains paused. P3 branch remains unmerged. Next review may authorize a new
+author-policy reference-trajectory diagnostic; it is not implemented here.
+Do not change the response gate or reuse the current run ID.

@@ -37,3 +37,28 @@ is supposed to aggregate successfully.
 
 For a new coverage design, create a new version after review; do not overwrite
 p03_mechanism_v1.json or prior results. No next-stage training CLI exists yet.
+
+## V2 neutral merge-region coverage
+
+Implemented plan: configs/development/p03_mechanism_v2_merge_region.json.
+It keeps v1 seeds, upstream config, probes, continuation, horizon and response
+thresholds. It selects ramp-end-minus-20m, internal-lane midpoint and downstream
+5m roots on a zero-jerk reference, using actual lane IDs/positions/lengths.
+Each reference discovery is capped at 250 steps; missing targets are not replaced.
+Native save/load is explicitly disabled. Budget: at most 9 roots, 90 short
+branch rollouts including exact repeats, plus discovery/prefix replays.
+
+~~~powershell
+python tools/diagnose_branches.py --config configs/development/p03_mechanism_v2_merge_region.json --run-id local_p3_merge_01
+~~~
+
+Use a fresh ID. Completed evidence: artifacts/p3/p3_merge_v2_01/report.json;
+clean implementation commit 78d4bb1; elapsed 249.32 seconds on this machine.
+Per-seed root_discovery.json records selection and unavailable reasons;
+root_<steps>_branches.json retains full traces and comparisons.
+
+Observed status: complete, engineering_gate=true, mechanism_gate=false,
+response_root_count=3/9, response_seeds=[100]. All nine roots were evaluated.
+77 unit/regression tests passed. Do not interpret successful exit as approval
+to start P4. See reports/p03_merge_region_diagnosis_20260927.md for interpretation
+and the proposed, not yet authorized, author-policy coverage diagnostic.

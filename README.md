@@ -23,8 +23,11 @@ P2 adds an independent continuous-jerk execution audit without changing upstream
 training. See [P2 acceptance](reports/p02_environment_acceptance_20260926.md),
 [contract](docs/design/p02_environment_contract.md), and
 [audit commands](docs/runbooks/p02_environment_audit.md).
-P3 exact replay passed, but its six diagnostic roots show no neighbor response;
-native snapshot continuation also failed parity. Read the
+P3 exact replay passed. V1 found no neighbor response; v2 neutral merge-region
+coverage found responses in 3/9 roots, all in one seed, so the unchanged
+two-seed mechanism gate still fails. Native snapshot continuation also failed
+parity and remains disabled. Read the
 [P3 findings](reports/p03_mechanism_diagnosis_20260926.md) and
+[v2 merge-region findings](reports/p03_merge_region_diagnosis_20260927.md), plus the
 [diagnostic runbook](docs/runbooks/p03_mechanism_diagnostics.md).
 Do not start predictor training until the interaction-coverage decision is resolved.
