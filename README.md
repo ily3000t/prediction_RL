@@ -3,8 +3,8 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P4d label alignment, masked loss and bounded training/resume
-interfaces passed; next is P4e formal collection/training protocol design and review.
+Current stage: P4e draft protocol/planning interface validated; awaiting user
+review before production collector/trainer implementation and formal execution.
 Full P4 and formal training readiness are
 not yet complete.
 Source supplied by the user
@@ -66,3 +66,10 @@ resume. These smoke weights are not formally trained or approved for control.
 See [supervision design](docs/design/p04_masked_training.md),
 [P4d acceptance](reports/p04d_masked_training_acceptance_20260927.md) and
 [bounded audit command](docs/runbooks/p04_masked_training.md).
+
+P4e provides a review-only draft for 256 train / 64 validation / 64 calibration /
+128 sealed test episodes. Planning validates provenance and split isolation but
+does not approve or execute any job. See the
+[proposal](docs/design/p04_collection_training_proposal.md),
+[planning acceptance](reports/p04e_protocol_planning_acceptance_20260928.md) and
+[review runbook](docs/runbooks/p04_protocol_review.md).
