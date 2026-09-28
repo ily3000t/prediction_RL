@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "purpose": "development_collector_parity_only",
+  "simulator_seeds": [0, 1, 100],
+  "source_mechanism_report": "artifacts/p3/p3_policy_v3_01/report.json",
+  "source_mechanism_sha256": "de70e24603f1647769e557c2649a27e845e34b581139f8900ccec2c138bec4ca",
+  "source_label_report": "artifacts/p4/p4_labels_v1_01/report.json",
+  "source_label_sha256": "7f4e239d40872262189bf527b366764bd818f69c680e8debe252b595bcbd27c2",
+  "source_training_report": "artifacts/p4/p4_training_v1_01/report.json",
+  "source_training_sha256": "174146a8d78962929e18bcd426f9c136db26f0f94deda5bfc449c488459dc3b5",
+  "network": "RL-MPC-LaneMerging-master/merge.net.xml",
+  "network_sha256": "47874cfb6faa044253f065bb9bf1ab56b24c9ba6aeccd24b1449af21dfffe9f1",
+  "history_steps": 11,
+  "neighbor_capacity": 12,
+  "horizon_steps": 25,
+  "tick_s": 0.2,
+  "probe_jerks": [-5, -2.5, 0, 2.5, 5],
+  "continuation_jerk": 0,
+  "branch_repeats": 2,
+  "worker_wall_limit_s": 300
+}

@@ -35,9 +35,9 @@ class MergeGeometry:
             if not math.isclose(traci.lane.getLength(lane), length, rel_tol=0, abs_tol=1e-6):
                 raise ValueError('Loaded simulator geometry differs from pinned network')
 
-    def validate_frame(self, frame):
+    def validate_frame(self, frame, *, require_ego=True):
         validate_traffic(frame)
-        if 'ego' not in frame['vehicles']:
+        if require_ego and 'ego' not in frame['vehicles']:
             raise ValueError('Nonterminal history requires ego')
         for state in frame['vehicles'].values():
             lane = state['lane_id']
