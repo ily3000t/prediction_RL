@@ -73,3 +73,10 @@ does not approve or execute any job. See the
 [proposal](docs/design/p04_collection_training_proposal.md),
 [planning acceptance](reports/p04e_protocol_planning_acceptance_20260928.md) and
 [review runbook](docs/runbooks/p04_protocol_review.md).
+
+P4f verifies a bounded resumable response collector on the same three development
+episodes. All 90 branch executions preserve original traces, history and labels;
+new future geometry stays in a separate audit sidecar. Checksum-verified resume
+reuses all episodes without simulation. This is NOT the formal dataset executor.
+See [P4f acceptance](reports/p04f_response_collection_acceptance_20260928.md) and
+[collection audit runbook](docs/runbooks/p04_response_collector.md).
