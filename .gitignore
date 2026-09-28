@@ -12,5 +12,6 @@ artifacts/
 *.csv
 *.png
 *.pdf
+/.vscode/
 RL-MPC-LaneMerging-master/st_cy.c
 RL-MPC-LaneMerging-master/experiment_data/
