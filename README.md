@@ -80,3 +80,10 @@ new future geometry stays in a separate audit sidecar. Checksum-verified resume
 reuses all episodes without simulation. This is NOT the formal dataset executor.
 See [P4f acceptance](reports/p04f_response_collection_acceptance_20260928.md) and
 [collection audit runbook](docs/runbooks/p04_response_collector.md).
+
+P4g adds the separate manual-start train/validation/calibration collector. The
+shared core again passes all nine development roots and exact supervised-tensor
+parity. A 384-episode request is prepared but NOT executed; 128 test episodes stay
+locked. See [P4g acceptance](reports/p04g_formal_collection_entry_acceptance_20260928.md)
+and the [user-run collection instructions](docs/runbooks/p04_formal_collection.md).
+Full predictor/DDPG training has not started.

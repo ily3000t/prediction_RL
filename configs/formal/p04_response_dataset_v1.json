@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "protocol_id": "prediction_response_dataset_v1",
+  "review_status": "collection_manual_start_required",
+  "baseline": {
+    "upstream_config": "RL-MPC-LaneMerging-master/configs/train_default_1.json",
+    "reference_checkpoint": "RL-MPC-LaneMerging-master/pretrained_models/ddpg_default1_extended/policy.pt",
+    "reference_sha256": "548663282e348356f658fe8204b44b7ad589d935b05a1f18fc3d8927b3dd7750",
+    "episode_group_namespace_sha256": "ee6c24ed7fdb00177dfb7ed559605367a5bbce403155f3b58ddd9e74a8965852",
+    "execution_contract": "simulation_blocking_exact_v1"
+  },
+  "sources": {
+    "mechanism_report": "artifacts/p3/p3_policy_v3_01/report.json",
+    "mechanism_sha256": "de70e24603f1647769e557c2649a27e845e34b581139f8900ccec2c138bec4ca",
+    "training_interface_report": "artifacts/p4/p4_training_v1_01/report.json",
+    "training_interface_sha256": "174146a8d78962929e18bcd426f9c136db26f0f94deda5bfc449c488459dc3b5"
+  },
+  "splits": {
+    "development_seeds": [
+      0,
+      1,
+      100
+    ],
+    "train": {
+      "start": 11000,
+      "count": 256
+    },
+    "validation": {
+      "start": 12000,
+      "count": 64
+    },
+    "calibration": {
+      "start": 13000,
+      "count": 64
+    },
+    "test": {
+      "start": 14000,
+      "count": 128
+    }
+  },
+  "collection": {
+    "episode_index": 0,
+    "backend": "fresh_sumo_prefix_replay_v1",
+    "reference_policy": "author_ddpg_greedy_timefeature_v1",
+    "root_targets": [
+      {
+        "id": "approach",
+        "lane_id": "ramp_0",
+        "reference": "before_end_m",
+        "value": 20
+      },
+      {
+        "id": "internal_mid",
+        "lane_id": ":mergenode_1_0",
+        "reference": "fraction",
+        "value": 0.5
+      },
+      {
+        "id": "downstream",
+        "lane_id": "highwayahead_0",
+        "reference": "from_start_m",
+        "value": 5
+      }
+    ],
+    "discovery_max_steps": 250,
+    "branch_repeats": 2,
+    "worker_processes": 1,
+    "unreachable_root": "record_without_replacement",
+    "engineering_error": "stop_preserve_failure",
+    "history_steps": 11,
+    "neighbor_capacity": 12,
+    "horizon_steps": 25,
+    "tick_s": 0.2,
+    "probe_jerks": [
+      -5,
+      -2.5,
+      0,
+      2.5,
+      5
+    ],
+    "continuation_jerk": 0,
+    "future_metadata": "lane_position_length_width_v1"
+  },
+  "model": {
+    "schema_version": 1,
+    "neighbor_capacity": 12,
+    "history_steps": 11,
+    "horizon_steps": 25,
+    "tick_s": 0.2,
+    "hidden_dim": 64,
+    "attention_heads": 4,
+    "ensemble_size": 3,
+    "jerk_min": -5,
+    "jerk_max": 5
+  },
+  "training": {
+    "methods": [
+      "ordinary",
+      "conditional"
+    ],
+    "member_seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "device": "cpu",
+    "torch_threads": 1,
+    "max_epochs": 100,
+    "batch_roots": 16,
+    "shuffle": "paired_seed_epoch_root_permutation",
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "epsilon": 1e-8,
+    "weight_decay": 0,
+    "clip_grad_norm": 1,
+    "loss_contract": "root_candidate_masked_mse_v1",
+    "channel_scales": [
+      10,
+      3,
+      5,
+      2
+    ],
+    "channel_weights": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "selection_metric": "validation_root_equal_scaled_mse",
+    "selection_tie": "earliest_epoch",
+    "early_stop_patience": 15,
+    "early_stop_min_delta": 0.0001,
+    "validation_every_epochs": 1,
+    "warm_start": false,
+    "bootstrap": false
+  },
+  "calibration": {
+    "method": "episode_max_standardized_residual_v1",
+    "nominal_coverage": 0.9,
+    "disagreement_floor_scale": 0.1,
+    "scope": "observed_nonterminal_cells_only"
+  },
+  "test_policy": {
+    "collection_release": "after_predictors_and_calibration_frozen",
+    "selection_use": "never",
+    "reuse_for_ddpg": "forbidden"
+  },
+  "review_items": [
+    "episode_budget_and_seed_ranges",
+    "three_root_reference_policy_coverage",
+    "training_budget_and_checkpoint_selection",
+    "calibration_scope_and_censoring",
+    "P5_shared_ego_geometry_and_ranking_definition"
+  ],
+  "execution": {
+    "contract": "response_collection_manual_start_v1",
+    "allowed_splits": [
+      "train",
+      "validation",
+      "calibration"
+    ],
+    "worker_wall_limit_s": 300,
+    "require_hash_confirmation": true
+  }
+}

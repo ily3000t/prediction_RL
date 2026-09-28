@@ -8,7 +8,7 @@ standalone fresh-machine data-generation command.
 From E:/Prediction_RL in pytorch, with clean committed source:
 
 ```powershell
-python tools/audit_response_collection.py --config configs/development/p04_response_collection_v1.json --run-id p4_collect_v1_02
+python tools/audit_response_collection.py --config configs/development/p04_response_collection_v1.json --run-id p4_collect_v2_02
 ```
 
 Use an unused short run ID for a deliberately recorded repeat. Each seed has
@@ -18,10 +18,12 @@ then zero jerk for the remainder of the 25-step horizon. Reference root discover
 uses the pinned author DDPG and is independently repeated. Root histories are
 also replayed twice. No policy/predictor optimizer or ST intervention is run.
 
-Accepted run: artifacts/p4/p4_collect_v1_01. Verify/reuse it without more SUMO:
+Current shared-engine accepted run: artifacts/p4/p4_collect_v2_01. The historical
+v1 run remains immutable and cannot be resumed with changed Python source.
+Verify/reuse the current run without more SUMO:
 
 ```powershell
-python tools/audit_response_collection.py --config configs/development/p04_response_collection_v1.json --run-id p4_collect_v1_01 --resume
+python tools/audit_response_collection.py --config configs/development/p04_response_collection_v1.json --run-id p4_collect_v2_01 --resume
 ```
 
 The request binds resolved collection configuration, split manifest, environment
@@ -69,7 +71,7 @@ Failure behavior:
 - The 300-second per-worker watchdog is an engineering failure cap, NOT a policy
   deadline. It never substitutes stale predictions or changes an observation.
 
-Next: review/freeze the P4e formal sampling/training protocol and implement its
-separate user-run executor with split-release controls. Do not simply relax this
-audit's seed guard or repurpose its inspected episodes as training/test data.
-Formal collection, predictor training/calibration and P5 acceptance are pending.
+The separate manual-start formal executor is now documented in
+[P4g runbook](p04_formal_collection.md). Do not relax this audit's seed guard or
+repurpose its inspected episodes as training/test data. Actual formal collection,
+predictor training/calibration and P5 acceptance remain pending.
