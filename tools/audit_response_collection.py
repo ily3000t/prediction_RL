@@ -14,13 +14,8 @@ from diagnose_branches import environment_metadata
 from prediction_rl.data.collection_store import (
     read_json as read, file_hash as sha, write_once, run_lock, seal_episode, verify_episode,
 )
-from prediction_rl.data.dataset_contract import build_branch_labels, digest, episode_id
+from prediction_rl.data.dataset_contract import digest, episode_id
 from prediction_rl.data.branching import ReplayBrancher, fingerprint
-from prediction_rl.data.reference_policy import AuthorDDPGReference
-from prediction_rl.data.merge_geometry import MergeGeometry
-from prediction_rl.data.actor_adapter import build_actor_inputs
-from prediction_rl.data.response_collection import branch_with_geometry, root_accounting
-from prediction_rl.envs.upstream import upstream_session
 
 PINNED = {
     'mechanism': 'de70e24603f1647769e557c2649a27e845e34b581139f8900ccec2c138bec4ca',
@@ -114,108 +109,46 @@ def prerequisites(config_path):
 
 
 def collect_seed(c, reports, seed, output, binding):
-    output.mkdir(parents=True, exist_ok=False)
-    started = time.perf_counter()
-    write_once(output / 'started.json', {'seed': seed, 'binding': binding, 'started_at': now()})
+    from prediction_rl.data.episode_collector import collect_episode
     p3, labels, training = (reports[k] for k in ('mechanism', 'label', 'training'))
     expected_child = next(child for child in p3['children'] if child['seed'] == seed)
-    geometry = MergeGeometry(project_path(c['network']))
-    progress = []
-    try:
-        with upstream_session(ROOT / 'RL-MPC-LaneMerging-master', project_path(p3['plan']['upstream_config']), seed) as settings:
-            write_once(output / 'settings.json', settings.export_settings())
-            if settings.TICK_LENGTH != c['tick_s']:
-                raise ValueError('Upstream time grid changed')
-            probes = [settings.MINIMUM_NEGATIVE_JERK + f * (settings.MAXIMUM_POSITIVE_JERK-settings.MINIMUM_NEGATIVE_JERK)
-                      for f in p3['plan']['probe_fractions']]
-            if probes != c['probe_jerks']:
-                raise ValueError('Declared probes differ from original action bounds')
-            reference = p3['plan']['reference_policy']
-            policy = AuthorDDPGReference(project_path(reference['checkpoint']), reference['sha256'],
-                                         'cuda' if settings.CUDA else 'cpu')
-            manager = ReplayBrancher()
-            try:
-                discovery = manager.discover_lane_roots(p3['plan']['root_targets'], p3['plan']['discovery_max_steps'], None, policy=policy)
-                repeated = manager.discover_lane_roots(p3['plan']['root_targets'], p3['plan']['discovery_max_steps'], None, policy=policy)
-                if discovery != repeated:
-                    raise AssertionError('Reference discovery is not repeatable')
-                write_once(output / 'discovery.json', discovery)
-                progress = root_accounting(discovery['targets'])
-                if len(progress) != len(expected_child['roots']):
-                    raise AssertionError('Predeclared roots missing from discovery')
-                episode = episode_id(labels['environment_identity_sha256'], seed, 0)
-                for number, (planned, expected) in enumerate(zip(discovery['targets'], expected_child['roots'])):
-                    if any(planned[k] != expected[k] for k in planned):
-                        raise AssertionError('Development root discovery changed')
-                    if planned['prefix_steps'] is None:
-                        continue
-                    root, history = manager.capture_with_history(planned['prefix_actions'], c['history_steps'])
-                    geometry.verify_runtime()
-                    if (root.signature != expected['signature'] or root.prefix_trace_hash != expected['prefix_trace_hash']
-                            or root.traffic != expected['root_traffic']):
-                        raise AssertionError('Extended history changed original root')
-                    repeat, history_repeat = manager.capture_with_history(root.prefix, c['history_steps'])
-                    if root.signature != repeat.signature or history != history_repeat:
-                        raise AssertionError('History replay differs')
-                    root_id = digest([episode, root.signature])
-                    inputs = build_actor_inputs(history, geometry, c['neighbor_capacity'], c['history_steps'], c['tick_s'])
-                    old_history_record = next(r for r in training['history_inputs'] if r['root_id'] == root_id)
-                    old_history = read(project_path(old_history_record['path']))
-                    if inputs != old_history['inputs'] or history != old_history['history']:
-                        raise AssertionError('Development actor/history features changed')
-                    old_pack = read(project_path(old_history['label_pack']))
-                    raw_path = project_path(c['source_mechanism_report']).parent / f'seed_{seed}/root_{len(root.prefix)}_branches.json'
-                    old_raw = read(raw_path)
-                    branches, futures = {}, {}
-                    directory = output / f'r{number}'
-                    candidates = []
-                    for index in [*range(5), *reversed(range(5))]:
-                        key = str(index)
-                        actions = [probes[index]] + [c['continuation_jerk']] * (c['horizon_steps'] - 1)
-                        trace, future = branch_with_geometry(manager, root, actions, geometry)
-                        if trace != old_raw['branches'][key] or trace != old_raw['reverse_order_repeats'][key]:
-                            raise AssertionError('Future metadata collection changed original transition/reward/observation')
-                        if key in branches:
-                            if trace != branches[key] or future != futures[key]:
-                                raise AssertionError('Reverse-order repeated branch/metadata differs')
-                            write_once(directory / f'c{index}_repeat.json', {'trace': trace, 'future_metadata': future})
-                        else:
-                            branches[key], futures[key] = trace, future
-                            label = build_branch_labels(root.traffic, trace, actions, c['tick_s'])
-                            if label != old_pack['candidates'][index]['labels']:
-                                raise AssertionError('Label/mask/termination semantics changed')
-                            candidates.append({'candidate_id': index, 'labels': label})
-                            write_once(directory / f'c{index}.json', {'trace': trace, 'future_metadata': future})
-                    pack = {'schema_version': 1, 'episode_id': episode, 'root_id': root_id,
-                            'simulator_seed': seed, 'episode_index': 0, 'split': 'development',
-                            'root_traffic': root.traffic, 'prefix_actions': list(root.prefix),
-                            'history_available': False, 'history': None, 'training_ready': False,
-                            'candidates': candidates}
-                    if pack != old_pack:
-                        raise AssertionError('Independent label pack reconstruction differs')
-                    # Compatibility pack retains P4a's history-unavailable flag; the joined
-                    # history is an independent artifact, as required by P4d supervision.
-                    write_once(directory / 'labels.json', pack)
-                    payload = {**old_history, 'inputs': inputs, 'history': history,
-                               'label_pack': str((directory / 'labels.json').relative_to(ROOT)),
-                               'label_pack_sha256': sha(directory / 'labels.json')}
-                    write_once(directory / 'history.json', payload)
-                    progress[number].update(status='complete', root_id=root_id, prefix_steps=len(root.prefix),
-                        candidate_count=5, branch_executions=10, original_trace_exact=True, history_input_exact=True,
-                        labels_exact=True, future_repeat_exact=True,
-                        terminal_branches=sum(trace[-1]['done'] for trace in branches.values()),
-                        future_observed_frames=sum(len(future['frames']) for future in futures.values()))
-                    write_once(directory / 'accounting.json', progress[number])
-                    print(f'[p4f] seed={seed} root={number} original/history/labels/future_repeat=exact', flush=True)
-            finally:
-                manager.close()
-        seal_episode(output, binding, {'seed': seed, 'roots': progress, 'status': 'complete',
-                     'elapsed_s': time.perf_counter()-started, 'finished_at': now(),
-                     'formal_training_ready': False})
-    except BaseException as error:
-        write_once(output / 'failure.json', {'seed': seed, 'binding': binding, 'roots': progress,
-                   'status': 'failed', 'failure_reason': f'{type(error).__name__}: {error}', 'finished_at': now()})
-        raise
+    reference = p3['plan']['reference_policy']
+    baseline = {'upstream_config': p3['plan']['upstream_config'],
+                'reference_checkpoint': reference['checkpoint'], 'reference_sha256': reference['sha256'],
+                'episode_group_namespace_sha256': labels['environment_identity_sha256']}
+    collection = {k: c[k] for k in ('history_steps', 'neighbor_capacity', 'horizon_steps',
+                  'tick_s', 'probe_jerks', 'continuation_jerk', 'branch_repeats')}
+    collection.update(episode_index=0, backend=ReplayBrancher.backend,
+                      root_targets=p3['plan']['root_targets'], discovery_max_steps=p3['plan']['discovery_max_steps'])
+    job = {'split': 'development', 'simulator_seed': seed,
+           'episode_id': episode_id(labels['environment_identity_sha256'], seed, 0)}
+
+    def audit(stage, value):
+        if stage == 'discovery':
+            if len(value['targets']) != len(expected_child['roots']):
+                raise AssertionError('Predeclared roots missing')
+            for planned, expected in zip(value['targets'], expected_child['roots']):
+                if any(planned[k] != expected[k] for k in planned):
+                    raise AssertionError('Accepted development discovery changed')
+            return
+        number, root = value['number'], value['root']
+        expected = expected_child['roots'][number]
+        if (root.signature != expected['signature'] or root.prefix_trace_hash != expected['prefix_trace_hash']
+                or root.traffic != expected['root_traffic']):
+            raise AssertionError('Accepted original root changed')
+        record = next(r for r in training['history_inputs'] if r['root_id'] == value['pack']['root_id'])
+        old_history = read(project_path(record['path']))
+        if any(value['history'][k] != old_history[k] for k in value['history']):
+            raise AssertionError('History/input construction changed')
+        if value['pack'] != read(project_path(old_history['label_pack'])):
+            raise AssertionError('Independent label construction changed')
+        raw = read(project_path(c['source_mechanism_report']).parent /
+                   f"seed_{seed}/root_{len(root.prefix)}_branches.json")
+        if value['branches'] != raw['branches'] or value['branches'] != raw['reverse_order_repeats']:
+            raise AssertionError('Original transition/reward/observation changed')
+        print(f'[p4f] seed={seed} root={number} original/history/labels=exact', flush=True)
+
+    return collect_episode(ROOT, baseline, collection, c['network'], job, output, binding, audit=audit)
 
 
 def aggregate(output, request, reports):
