@@ -173,3 +173,16 @@ def test_prepare_hashes_inputs_without_model_evaluation(tmp_path,monkeypatch):
 def test_checked_protocol_file_has_no_hidden_tuning_fields():
     from prediction_rl.data.collection_store import read_json
     assert read_json(ROOT/'configs/development/p05_offline_diagnostics_v1.json')==cli.CONFIG
+
+
+def test_tracked_json_newlines_do_not_change_parameter_provenance(tmp_path,monkeypatch):
+    monkeypatch.setattr(cli,'ROOT',tmp_path)
+    cp=tmp_path/'config.json';artifact=tmp_path/'report.json'
+    cp.write_bytes(b'{\n  "value": 1\n}\n');artifact.write_bytes(b'{"status":"complete"}')
+    before=cli.artifact_hashes(cp,[artifact])
+    cp.write_bytes(b'{\r\n  "value": 1\r\n}\r\n')
+    assert cli.artifact_hashes(cp,[artifact])==before
+    cp.write_bytes(b'{"value":2}')
+    assert cli.artifact_hashes(cp,[artifact])!=before
+    cp.write_bytes(b'{"value":1}');artifact.write_bytes(b'{"status":"failed"}')
+    assert cli.artifact_hashes(cp,[artifact])!=before

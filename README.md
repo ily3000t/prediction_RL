@@ -104,7 +104,7 @@ and [manual calibration command](docs/runbooks/p04_predictor_calibration.md).
 P5a reviews completed calibration: episode coverage meets the nominal fit target,
 but bands are very wide. A separate manual diagnostic now compares validation
 errors with a root-only lane-chain CV reference, checks candidate-response deltas,
-and attributes frozen-band extremes. 355 tests and a nine-root smoke pass; full
+and attributes frozen-band extremes. 356 tests and a nine-root smoke pass; full
 diagnosis is prepared, **not run**. This is not action ranking or test evidence.
 See [P5a acceptance](reports/p05a_calibration_review_and_diagnostic_entry_20260929.md)
 and [diagnostic command/definitions](docs/runbooks/p05_offline_diagnostics.md).
