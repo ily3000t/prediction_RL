@@ -1,0 +1,17 @@
+{
+  "version": "p05_offline_diagnostics_v1",
+  "analysis_status": "development_validation_diagnostic_not_test",
+  "calibration_request": "artifacts/calibration/predictor_v1/request.json",
+  "network": "RL-MPC-LaneMerging-master/merge.net.xml",
+  "methods": ["lane_chain_constant_velocity", "ordinary", "conditional"],
+  "point_error_split": "validation",
+  "band_attribution_splits": ["validation", "calibration"],
+  "batch_roots": 16,
+  "point_metrics": "candidate_then_root_and_episode_equal_v1",
+  "response_metric": "all_ten_candidate_pair_delta_scaled_mse_common_masks_v1",
+  "reference": "root_anchored_lane_chain_constant_speed_zero_acceleration_v1",
+  "unobserved_tail": "exclude_and_count_never_impute",
+  "hypothesis_test": false,
+  "test_release": false,
+  "ddpg_release": false
+}
