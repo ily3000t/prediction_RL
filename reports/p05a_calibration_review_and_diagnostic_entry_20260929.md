@@ -94,3 +94,25 @@ predictor test episode directories=0. Audit/prepare ran from clean implementatio
 User command and metric definitions: `docs/runbooks/p05_offline_diagnostics.md`.
 P5a results are currently unknown. Do not infer CV superiority, the worst-error
 channel, candidate ranking improvement or DDPG readiness before running/reviewing.
+
+## Post-merge Windows provenance correction
+
+The final main-branch verification rejected the first prepared request: Git's
+LF→CRLF checkout conversion changed the new JSON config's byte hash without
+changing any parameter. No diagnostic had run. This is an engineering provenance
+bug, not a negative experiment result or a reason to change seeds/thresholds.
+
+Fix commit `b9b468763977924619576c3ab4afd002429a7200` uses canonical parsed JSON
+hashes for the tracked config only; immutable reports, model files and map retain
+byte hashes. One regression verifies LF/CRLF equivalence AND rejection of real
+parameter/artifact changes. Full suite re-run: **356 passed in 9.23 s**.
+
+Bounded audit repeated from clean fixed source on the same nine development roots:
+`artifacts/p5/p5a_interface_v1_02/report.json`, SHA256
+`6e7f4adc1de26d393af4b277891a569fc9784c2768e840acdd54fbefd34f73da`.
+New prepared request (old one retained unchanged):
+`artifacts/offline/predictor_v1_diag2/request.json`, SHA256
+`b73b75030feae8040372caa2a292bb7405acc76d795fcfd2990af1225e054a37`.
+New canonical confirmation hash:
+`2c13c83000fae4f54cb6b382bc715d4fbfa32881d0a36399407047ac28d73d08`.
+The runbook now points only to diag2. No parameters, models or calibrated q changed.

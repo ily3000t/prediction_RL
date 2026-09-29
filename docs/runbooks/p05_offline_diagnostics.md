@@ -15,7 +15,7 @@
 在 `(pytorch) E:\Prediction_RL>` 执行：
 
 ```powershell
-python tools/diagnose_response_predictors.py run --request artifacts/offline/predictor_v1_diag/request.json --confirm-request-hash 2a651b355533f1499776f6b060ee7dc87fa2c2604d04dfb446b2e7da1f1377d4
+python tools/diagnose_response_predictors.py run --request artifacts/offline/predictor_v1_diag2/request.json --confirm-request-hash 2c13c83000fae4f54cb6b382bc715d4fbfa32881d0a36399407047ac28d73d08
 ```
 
 独立、无嵌套的配置：`configs/development/p05_offline_diagnostics_v1.json`。
@@ -72,7 +72,7 @@ calibration 是拟合样本内结果；validation 已参与 checkpoint selection
 
 ## 产物与下一步
 
-所有结果保存在 `artifacts/offline/predictor_v1_diag/`：
+所有结果保存在 `artifacts/offline/predictor_v1_diag2/`：
 
 - `report.json`：两划分汇总、三方法误差、配对差值及区间归因。
 - `validation_<method>_roots.json`：逐 root 预测指标。
@@ -84,6 +84,11 @@ calibration 是拟合样本内结果；validation 已参与 checkpoint selection
 诊断完成后先复盘结果，再讨论 P5b 候选几何／排序协议。
 P5 全部验收前，不启动测试采集或 DDPG。
 
-已执行的工程检查（不用重跑）：355 项单元测试；
-`p5a_interface_v1_01` 九个既有开发 roots 上的真实权重／CV／指标 smoke；
+已执行的工程检查（不用重跑）：356 项单元测试；
+`p5a_interface_v1_02` 九个既有开发 roots 上的真实权重／CV／指标 smoke；
 正式诊断仅 prepare，尚未 run。
+
+此前 `predictor_v1_diag` 请求在 Git 合并后因 JSON 的 LF→CRLF 换行转换而拒绝校验，
+没有执行过诊断。修复后人工维护的 JSON 使用规范参数哈希，实验产物仍严格按字节哈希；
+新增回归测试同时验证换行等价、真实参数变化及产物变化仍被识别。
+旧请求与审计保留用于追溯，不使用旧命令，不删除或覆盖旧产物。
