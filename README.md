@@ -87,3 +87,10 @@ parity. A 384-episode request is prepared but NOT executed; 128 test episodes st
 locked. See [P4g acceptance](reports/p04g_formal_collection_entry_acceptance_20260928.md)
 and the [user-run collection instructions](docs/runbooks/p04_formal_collection.md).
 Full predictor/DDPG training has not started.
+
+P4h now verifies the user's completed 384-episode collection: 710/176/169 usable
+trajectory roots in train/validation/calibration, with empty roots preserved and
+test still locked. The CPU epoch trainer passes 305 tests and six-member bounded
+development resume checks. A full ordinary/conditional training request is
+prepared, **not executed**. See [P4h acceptance](reports/p04h_dataset_and_training_entry_acceptance_20260929.md)
+and [manual predictor training](docs/runbooks/p04_predictor_training.md).
