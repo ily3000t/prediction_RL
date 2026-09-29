@@ -31,6 +31,13 @@ CONFIG={'version':'p05_offline_diagnostics_v1','analysis_status':'development_va
     'unobserved_tail':'exclude_and_count_never_impute','hypothesis_test':False,'test_release':False,'ddpg_release':False}
 
 
+def artifact_hashes(config_path,paths):
+    # Tracked JSON can be checked out as LF or CRLF. Bind parsed parameters,
+    # while retaining byte hashes for immutable run artifacts and the map.
+    return {'json_canonical:'+str(config_path.relative_to(ROOT)):digest(read(config_path)),
+            **{str(x.relative_to(ROOT)):sha(x) for x in paths}}
+
+
 def prerequisites(config_path):
     cp=inside(ROOT,config_path); config=read(cp)
     if config!=CONFIG: raise ValueError('Unsupported P5a diagnostic protocol; do not tune on inspected outcomes')
@@ -61,8 +68,8 @@ def prerequisites(config_path):
             collection=inside(ROOT,name).parent
             if any((collection/j['job_id']).exists() for j in plan['jobs'] if j['split']=='test'):
                 raise ValueError('P5a requires still-sealed test; review release separately')
-    paths=[cp,qp,out/'preparation.json',out/'report.json',out/'calibration.json',rp,inside(ROOT,config['network'])]
-    return config,r,p,d,frozen,{str(x.relative_to(ROOT)):sha(x) for x in paths}
+    paths=[qp,out/'preparation.json',out/'report.json',out/'calibration.json',rp,inside(ROOT,config['network'])]
+    return config,r,p,d,frozen,artifact_hashes(cp,paths)
 
 
 def data(d,split):
