@@ -94,3 +94,9 @@ test still locked. The CPU epoch trainer passes 305 tests and six-member bounded
 development resume checks. A full ordinary/conditional training request is
 prepared, **not executed**. See [P4h acceptance](reports/p04h_dataset_and_training_entry_acceptance_20260929.md)
 and [manual predictor training](docs/runbooks/p04_predictor_training.md).
+
+P4i verifies the completed six-member training and adds a separate episode-level
+calibration entry. All selected ensembles match their best epochs; 336 tests and
+bounded development inference checks pass. Formal calibration is prepared, **not
+fitted**; test and DDPG remain locked. See [training/calibration acceptance](reports/p04i_training_and_calibration_entry_acceptance_20260929.md)
+and [manual calibration command](docs/runbooks/p04_predictor_calibration.md).
