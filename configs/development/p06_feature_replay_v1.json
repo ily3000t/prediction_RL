@@ -1,0 +1,14 @@
+{
+  "version": "prediction_probe_features_v1",
+  "purpose": "bounded_engineering_replay_not_policy_evaluation",
+  "task_report": "artifacts/task_diagnostics/predictor_v1_task1/report.json",
+  "task_report_sha256": "0c2606bd1266d4ddbf9d6d8db5ab6f7f96fcab457ffdb7a11f8f15a29edd4938",
+  "arms": ["baseline", "zero", "ordinary", "conditional"],
+  "replays": [
+    {"id": "stream", "simulator_seed": 0, "jerks": [5.0], "episodes": 2, "step_cap": 160, "require_terminal": true},
+    {"id": "mixed", "simulator_seed": 100, "jerks": [-5.0, -2.5, 0.0, 2.5, 5.0], "episodes": 1, "step_cap": 40, "require_terminal": false}
+  ],
+  "execution_contract": "simulation_blocking_exact_v1",
+  "formal_training": false,
+  "test_opened": false
+}
