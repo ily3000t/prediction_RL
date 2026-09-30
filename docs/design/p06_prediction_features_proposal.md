@@ -1,5 +1,8 @@
 # P6a prediction features — DRAFT, not frozen or executable
 
+Superseded after user authorization by `p06_prediction_features_v1.md`.
+This document remains the historical proposal; numeric implementation is v1.
+
 ## Motivation and boundary
 
 P5c shows maximum bumper distance is weakly aligned with original branch reward.
