@@ -1,0 +1,21 @@
+{
+  "version": "p05_candidate_ranking_v1",
+  "analysis_status": "exploratory_validation_not_test",
+  "p5a_request": "artifacts/offline/predictor_v1_diag2/request.json",
+  "network": "RL-MPC-LaneMerging-master/merge.net.xml",
+  "upstream_config": "RL-MPC-LaneMerging-master/configs/train_default_1.json",
+  "methods": ["lane_chain_constant_velocity", "ordinary", "conditional"],
+  "split": "validation",
+  "batch_roots": 16,
+  "ego_rollout": "root_only_saturated_jerk_lane_chain_semi_implicit_v1",
+  "ego_parity_tolerances": {"position_m": 0.01, "speed_mps": 0.001, "acceleration_mps2": 0.001},
+  "score": "maximize_min_front_bumper_euclidean_distance_selected_actors_v1",
+  "support": "same_actor_time_intersection_all_five_candidates_including_observed_ego",
+  "views": ["all_common_observed_support", "complete_5s_all_selected_actors"],
+  "numeric_tie_epsilon_m": 0.000001,
+  "tie_break": "lowest_candidate_id",
+  "calibrated_bands_used": false,
+  "hypothesis_test": false,
+  "test_release": false,
+  "ddpg_release": false
+}
