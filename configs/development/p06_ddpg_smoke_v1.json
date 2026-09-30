@@ -1,0 +1,16 @@
+{
+  "version": "p06_ddpg_feature_smoke_v1",
+  "purpose": "bounded_optimizer_integration_not_method_evaluation",
+  "feature_audit": "artifacts/p6/p6a_features_01/report.json",
+  "feature_audit_sha256": "18abb76be0d4c7a665ac7ff4f08e4c53ee1622dfa334c90aa296605b9373e06b",
+  "arms": ["baseline", "zero", "ordinary", "conditional"],
+  "run_seed": 0,
+  "requested_frames": 64,
+  "episode_cap": 4,
+  "device": "cpu",
+  "torch_threads": 1,
+  "diagnostic_overrides": {"replay_start_size": 8, "minibatch_size": 8},
+  "execution_contract": "simulation_blocking_exact_v1",
+  "formal_training": false,
+  "test_opened": false
+}

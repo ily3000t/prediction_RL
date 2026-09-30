@@ -35,6 +35,23 @@ def verify_historical_inputs(repo, hashes, commit):
             raise ValueError('Historical collection input mismatch: '+name)
 
 
+def verify_historical_text_checkout(repo, name, recorded_sha256, commit):
+    """Bind old byte hash to its Git blob; allow ONLY Git LF/CRLF checkout spelling.
+
+    No semantic/whitespace relaxation, report rewriting or hash replacement.
+    """
+    import hashlib
+    if not re.fullmatch('[0-9a-f]{40}',commit):raise ValueError('Invalid historical commit')
+    path=inside(repo,name);relative=path.relative_to(repo.resolve()).as_posix()
+    raw=subprocess.check_output(['git','-C',str(repo),'show',commit+':'+relative])
+    lf=raw.replace(b'\r\n',b'\n')
+    variants=(raw,lf,lf.replace(b'\n',b'\r\n'))
+    if recorded_sha256 not in {hashlib.sha256(x).hexdigest() for x in variants}:
+        raise ValueError('Recorded text hash does not bind historical Git source')
+    if path.read_bytes().replace(b'\r\n',b'\n')!=lf:
+        raise ValueError('Historical text checkout changed beyond line endings')
+
+
 def review_dataset(repo, request_path, report_path):
     repo = repo.resolve(); request_path = inside(repo, request_path); report_path = inside(repo, report_path)
     request, report = read_json(request_path), read_json(report_path)
