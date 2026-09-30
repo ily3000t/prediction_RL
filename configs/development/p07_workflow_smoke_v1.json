@@ -1,0 +1,61 @@
+{
+  "version": "p07_workflow_smoke_v1",
+  "purpose": "bounded_pipeline_engineering_audit",
+  "ddpg_audit": "artifacts/p6/p6b_ddpg_01/report.json",
+  "ddpg_audit_sha256": "694fe1fc35361a684d2c908becd11d79a3a797963838eaa444fa4b5392c0ea31",
+  "arms": [
+    "baseline",
+    "zero",
+    "ordinary",
+    "conditional"
+  ],
+  "training": {
+    "run_seeds": [
+      0
+    ],
+    "requested_frames": 64,
+    "episode_cap": 4,
+    "workers": 1,
+    "device": "cpu",
+    "torch_threads": 1,
+    "learning_rate": 0.0002,
+    "replay_start_size": 8,
+    "minibatch_size": 8,
+    "warm_start": false
+  },
+  "selection": "final_checkpoint_only_no_eval_selection",
+  "evaluation": {
+    "simulator_seeds": [
+      200
+    ],
+    "episodes_per_seed": 1,
+    "workers": 2,
+    "policy": "deterministic_no_exploration"
+  },
+  "execution_contract": "simulation_blocking_exact_v1",
+  "test_opened": false,
+  "comparisons": [
+    {
+      "id": "input_capacity",
+      "left": "baseline",
+      "right": "zero"
+    },
+    {
+      "id": "ordinary_information",
+      "left": "zero",
+      "right": "ordinary"
+    },
+    {
+      "id": "action_conditioning",
+      "left": "ordinary",
+      "right": "conditional"
+    },
+    {
+      "id": "total_augmentation",
+      "left": "baseline",
+      "right": "conditional"
+    }
+  ],
+  "aggregation": "paired_simulator_seeds_within_run_seed_then_equal_run_seed_mean",
+  "formal_training": false
+}
