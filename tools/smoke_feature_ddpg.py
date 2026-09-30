@@ -16,7 +16,7 @@ sys.path[:0]=[str(ROOT/'src'),str(ROOT/'tools')]
 import train_response_predictors as shared
 import audit_prediction_features as features
 from prediction_rl.data.collection_store import read_json as read, write_once, file_hash as sha
-from prediction_rl.data.frozen_dataset import inside, verify_historical_inputs
+from prediction_rl.data.frozen_dataset import inside, verify_historical_inputs, verify_historical_text_checkout
 from prediction_rl.data.dataset_contract import digest
 from prediction_rl.data.merge_geometry import read_extended_traffic
 from prediction_rl.envs.upstream import upstream_session, AuditedJerkEnv
@@ -56,8 +56,7 @@ def prerequisites(path):
             or report['test_opened']is not False or report['ddpg_connected']is not False):
         raise ValueError('Need immutable accepted P6a replay')
     verify_historical_inputs(ROOT,{'python_lf:'+k:v for k,v in request['source_hashes'].items()},report['git_commit'])
-    if sha(inside(ROOT,request['config_path']))!=request['config_sha256']:
-        raise ValueError('P6a frozen configuration changed')
+    verify_historical_text_checkout(ROOT,request['config_path'],request['config_sha256'],report['git_commit'])
     r,p=features.prerequisites(request['config_path'])
     if r['ensembles']!=report['ensembles']:raise ValueError('Predictor selection changed')
     return r,p
