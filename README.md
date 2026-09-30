@@ -3,10 +3,12 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P4e draft protocol/planning interface validated; awaiting user
-review before production collector/trainer implementation and formal execution.
-Full P4 and formal training readiness are
-not yet complete.
+Current stage: P7 four-arm exploratory DDPG workflow is engineering-validated.
+Predictor training/calibration and P5 diagnostics are complete; P6 preserves
+the original continuous-control/reward semantics. P7 exploration is user-run;
+P8 formal training and confirmation still require explicit approval. See the
+[P7 acceptance](reports/p07_exploration_workflow_acceptance_20260930.md) and
+[training/evaluation commands](docs/runbooks/p07_exploration.md).
 Source supplied by the user
 remains in `RL-MPC-LaneMerging-master/`; no directory migration is implied.
 Original DDPG, reward and continuous jerk control are retained.
@@ -16,7 +18,8 @@ weights. `provenance/` records source identity; `reports/` records verification.
 Large/generated outputs belong under ignored `artifacts/`.
 
 The shared pytorch environment is used at the user's request. Do not silently
-downgrade its core packages. No formal training is authorized in this stage.
+downgrade its core packages. No formal training is authorized in this stage;
+the released P7 request is a small development exploration, not a paper test.
 
 Bounded RL, ST, RL+ST, optimizer and original training-entry checks now pass.
 This is not full paper reproduction. See
