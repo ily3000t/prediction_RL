@@ -1,0 +1,20 @@
+{
+  "version": "p05_task_relevance_v1",
+  "purpose": "in_sample_task_diagnosis_not_generalization",
+  "ranking_request": "artifacts/ranking/predictor_v1_rank1/request.json",
+  "training_collection_request": "artifacts/data/response_v1/request.json",
+  "development_request": "artifacts/p4/p4_collect_v2_01/request.json",
+  "development_report": "artifacts/p4/p4_collect_v2_01/invocations/398fb383670c/report.json",
+  "methods": ["lane_chain_constant_velocity", "ordinary", "conditional"],
+  "analysis_split": "train",
+  "batch_roots": 16,
+  "return_definition": "undiscounted_recorded_prefix_not_policy_Q",
+  "return_comparability": "both_terminal_or_both_complete_5s",
+  "events": "preserve_original_labels_and_censoring",
+  "coverage": "all_observed_nonterminal_vehicles_nearest_bumper_and_same_path_gap",
+  "localization": "selected_common_support_true_critical_cell",
+  "model_update": false,
+  "feature_release": false,
+  "ddpg_release": false,
+  "test_release": false
+}
