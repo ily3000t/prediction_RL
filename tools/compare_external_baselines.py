@@ -3,6 +3,7 @@ import argparse
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -71,7 +72,7 @@ def audit_evidence(path):
 
 def prepare(config, run_id, audit_path=None):
     shared.clean(); pp, p = parent(config)
-    evidence = None if config == AUDIT else audit_evidence(audit_path or 'artifacts/p7d/p7d_audit_v1/aggregate.json')
+    evidence = None if config == AUDIT else audit_evidence(audit_path or 'artifacts/p7d/p7d_audit_v2/aggregate.json')
     if PROTOCOL['simulator_seeds'] != p['protocol']['evaluation']['simulator_seeds']:
         raise ValueError('Use existing complete development scene roster')
     resolved = {}
@@ -91,6 +92,7 @@ def prepare(config, run_id, audit_path=None):
          'upstream_config_hashes': configurations(), 'common_settings_sha256': digest(common),
          'parent_request_hash': digest(p), 'resolved_settings_at_reference_seed': resolved,
          'engineering_audit': evidence}
+    q = json.loads(json.dumps(q, allow_nan=False))
     write_once(out/'request.json', q)
     write_once(out/'preparation.json', {'request_hash': digest(q), 'status': 'prepared_not_simulated', 'evaluation_episodes': len(q['jobs'])})
     print('external_request='+str(out/'request.json'), flush=True); print('confirm_request_hash='+digest(q), flush=True)

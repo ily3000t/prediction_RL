@@ -1,5 +1,6 @@
 """Author-loop external comparison. Negative outcomes are valid observations."""
 from copy import deepcopy
+import json
 import math
 import statistics
 import numpy as np
@@ -49,7 +50,9 @@ def common_settings(settings):
                'ROLLOUT_LENGTH', 'ST_TEST_ROLLOUTS', 'USE_MIN_ALLOWED_DISTANCE_IN_COMBINED_SOLVER',
                'LIMIT_DQN_SPEED', 'TEST_ST_STRICTLY_BETTER', 'TEST_ROLLOUT_STATE', 'CHECK_ROLLOUT_CRASH',
                'COMBINATION_MIN_DISTANCE', 'STOP_X', 'REMEMBER_LAST_CHOICE_FOR_SWITCHING_COMBINED'}
-    return {k: v for k, v in settings.items() if k not in ignored}
+    # Settings includes integer-keyed action dictionaries. Freeze JSON semantics
+    # BEFORE hashing: reading a receipt converts those keys to strings.
+    return json.loads(json.dumps({k: v for k, v in settings.items() if k not in ignored}, allow_nan=False))
 
 
 def finite_mean(values):

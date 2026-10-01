@@ -57,6 +57,14 @@ def test_selected_author_configs_share_environment_and_reward():
     assert digest(p) != digest(common[0])
 
 
+def test_integer_settings_keys_hash_identically_after_json_storage():
+    settings = {'JERK_VALUES': {0:-5, 1:-2.5, 2:0, 10:5}, 'TASK':'ST'}
+    stored = json.loads(json.dumps(settings))
+    assert digest(common_settings(settings)) == digest(common_settings(stored))
+    q = json.loads(json.dumps({'settings':settings}, allow_nan=False))
+    assert digest(q) == digest(json.loads(json.dumps(q, sort_keys=True)))
+
+
 def test_reward_score_is_exact_upstream_history_convention_not_gym_return():
     with upstream_session(runner.SOURCE, runner.SOURCE/'configs/train_default_1.json', 200):
         import rl, dqn

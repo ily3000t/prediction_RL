@@ -55,12 +55,12 @@ CPU 推理是显式运行设置（`CUDA=false`），不是奖励/策略/监督�
 在 `E:\Prediction_RL`、已激活 `pytorch` 环境下：
 
 ```powershell
-python tools/compare_external_baselines.py audit --run-id p7d_audit_v1
+python tools/compare_external_baselines.py audit --run-id p7d_audit_v2
 python tools/compare_external_baselines.py prepare --run-id p7d_compare_v1
 ```
 
 已有验收产物时不要重跑 `audit`。`prepare` 默认验证
-`artifacts/p7d/p7d_audit_v1/aggregate.json`；非默认验收 ID 可用
+`artifacts/p7d/p7d_audit_v2/aggregate.json`；非默认验收 ID 可用
 `--engineering-audit artifacts/p7d/<audit-id>/aggregate.json` 指定并记录哈希。
 准备输出 request 路径与 `confirm_request_hash`，检查后由用户运行：
 
