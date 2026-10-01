@@ -1,0 +1,36 @@
+{
+  "version": "p07b_closed_loop_diagnostics_v1",
+  "purpose": "development_recording_not_method_selection",
+  "parent_request": "artifacts/p7/p7_explore_v1/request.json",
+  "parent_request_hash": "d068c069334874d668bcdbe32c7e62a42b997c40d151feb099794d50fcb7833f",
+  "parent_aggregate_sha256": "c6ffb04656ad349442814ddde6b768a361b47bc6edfeeab1c061886281f960bb",
+  "arms": [
+    "baseline",
+    "zero",
+    "ordinary",
+    "conditional"
+  ],
+  "run_seeds": [
+    0,
+    1,
+    2
+  ],
+  "simulator_seeds": [
+    200,
+    210,
+    219
+  ],
+  "scene_selection": "first_midpoint_index_n_over_2_last_of_parent_roster",
+  "workers": 2,
+  "torch_threads": 1,
+  "policy": "deterministic_no_exploration",
+  "execution_contract": "simulation_blocking_exact_v1",
+  "parity": "exact_parent_actions_rewards_outcomes_v1",
+  "reference": "observed_eligible_train_roots_no_labels_v1",
+  "thresholds_descriptive_only": {
+    "low_speed_mps": 0.1,
+    "reconstructed_speed_gap_mps": 0.001
+  },
+  "formal_claim": false,
+  "test_opened": false
+}
