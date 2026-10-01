@@ -7,12 +7,13 @@ Current stage: P7 four-arm exploratory DDPG runs and paired evaluation are compl
 The conditional predictor improves on ordinary prediction but does not outperform
 the matched zero-channel control. Formal P8 freeze is not recommended yet; see
 the [complete result review](reports/p07_results_review_20261001.md).
-P7b now provides read-only observed-input/execution recording. Its four-episode
-engineering audit preserves all original actions, rewards and outcomes, and
-checksum-verified resume performs no new simulation. The full 36-episode
-development diagnosis remains user-run; it is not a new training experiment or
-P8 approval. See the [P7b acceptance](reports/p07b_recording_acceptance_20261001.md)
-and [diagnostic commands](docs/runbooks/p07b_closed_loop_diagnostics.md).
+P7b's user-run 36-episode diagnosis is now complete: all 9,948 transitions exactly
+reproduce P7. It confirms actual ramp stagnation, identifies predictor-input
+coverage gaps, and finds no evidence of nearest-actor omission or numerical input
+explosion in these recordings. These are diagnostic findings, not causal proof
+or P8 approval. See the [P7b result review](reports/p07b_results_review_20261001.md),
+[engineering acceptance](reports/p07b_recording_acceptance_20261001.md), and
+[diagnostic commands](docs/runbooks/p07b_closed_loop_diagnostics.md).
 Predictor training/calibration and P5 diagnostics are complete; P6 preserves
 the original continuous-control/reward semantics. Long experiments remain user-run;
 P8 formal training and confirmation still require explicit approval. See the
