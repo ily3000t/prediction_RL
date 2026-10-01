@@ -75,14 +75,16 @@ NaN、模型错误、执行错误是无效运行；碰撞、停车和到达失�
 
 ### 本机已准备好的请求（2026-10-01）
 
-工程验收及 `prepare` 已执行，无须再次运行上述两步。当前完整请求还没有任何
-`evaluate/` 产物。可在 `pytorch` 环境、项目根目录直接执行：
+工程验收及 `prepare` 已执行。用户随后已完成下面的140回合运行，结果已核验；
+现在不需要重新训练或重跑。以下是已完成请求的原始启动命令：
 
 ```powershell
 python tools/compare_external_baselines.py run --request artifacts/p7d/p7d_compare_v1/request.json --confirm-request-hash 18a2434c49a9f44ff27b0b0e27221b2d1914af2703373bd606609febac0a67e3
 ```
 
 上述哈希对应已冻结的本机请求，不是可跨机器复制的通用常量。
+完成的结果为 `artifacts/p7d/p7d_compare_v1/aggregate.json`；复盘见
+`reports/p07d_results_review_20261001.md`。没有执行新的噪声诊断或P8。
 
 ## 分析边界
 
