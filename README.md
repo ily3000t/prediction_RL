@@ -3,9 +3,12 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P7 four-arm exploratory DDPG workflow is engineering-validated.
+Current stage: P7 four-arm exploratory DDPG runs and paired evaluation are complete.
+The conditional predictor improves on ordinary prediction but does not outperform
+the matched zero-channel control. Formal P8 freeze is not recommended yet; see
+the [complete result review](reports/p07_results_review_20261001.md).
 Predictor training/calibration and P5 diagnostics are complete; P6 preserves
-the original continuous-control/reward semantics. P7 exploration is user-run;
+the original continuous-control/reward semantics. Long experiments remain user-run;
 P8 formal training and confirmation still require explicit approval. See the
 [P7 acceptance](reports/p07_exploration_workflow_acceptance_20260930.md) and
 [training/evaluation commands](docs/runbooks/p07_exploration.md).
