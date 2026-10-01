@@ -3,7 +3,16 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-Current stage: P7 four-arm exploratory DDPG runs and paired evaluation are complete.
+P7d's external comparison entry is now engineering-accepted: author DDPG, ST,
+and both original RL+MPC variants use the same unchanged author episode loop as
+the frozen conditional-feature DDPG. Nine bounded audit episodes pass; the
+140-episode development comparison is prepared, **not run**. No model was
+retrained. This takes priority over the still-draft P7c noise diagnostic; it is
+not P8 or a matched-budget paper claim. See the
+[P7d acceptance](reports/p07d_external_baselines_acceptance_20261001.md) and
+[exact manual command/contract](docs/runbooks/p07d_external_baselines.md).
+
+The earlier P7 four-arm exploratory DDPG runs and paired evaluation are complete.
 The conditional predictor improves on ordinary prediction but does not outperform
 the matched zero-channel control. Formal P8 freeze is not recommended yet; see
 the [complete result review](reports/p07_results_review_20261001.md).
