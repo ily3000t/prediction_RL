@@ -43,6 +43,7 @@ Outputs:
 - report.json / complete.json: immutable inventory and exact parent parity.
 - invocations/<id>: child logs and complete/failed invocation report.
 - summary.json: all per-job diagnostics, all_replays_exact; no method-effect gate.
+- summary_receipt.json: request binding and summary byte SHA256, checked on resume.
 
 Use --resume only for checksum-verified complete recordings. Failed/incomplete
 recordings are not automatically retried or overwritten. An existing summary is
@@ -73,6 +74,11 @@ python tools/diagnose_feature_ddpg.py audit --run-id p7b_record_01
 Four arms at training seed 2 / scene 200, maximum 2,000 transitions, deliberately
 covering long/failed paths. This tests instrumentation/parity, not method effect.
 Use a new short run ID if one exists; never delete the old failed result.
+
+The completed p7b_record_01 audit and its complete-only resume are documented in
+[the acceptance record](../../reports/p07b_recording_acceptance_20261001.md).
+All 1,623 actions/rewards/outcomes match P7. These deliberately selected four
+engineering cases do not replace the full 36-episode development diagnosis.
 
 After the user-run diagnosis, review lane/low-speed/progress and feature coverage
 for all seeds before proposing budget or model changes. P8 remains separately
