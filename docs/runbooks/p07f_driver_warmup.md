@@ -64,14 +64,28 @@ python tools/diagnose_driver_warmup.py run --request artifacts/p7f/p7f_diag_v1/r
 6个新回合、6个历史引用、1473次实际控制调用，engineering_complete=true。
 三模型的相同预热初始共同交通均一致；后续轨迹逐位差异仍保留，不将数值
 舍入差异直接当语义错误，也不以该单场景作方法结论。
-不要重复audit。完整42回合尚未运行，准备后使用其新请求哈希启动。
+不要重复audit。完整42回合现已由用户运行完成，见下方结果复盘。
 验收细节见`reports/p07f_driver_warmup_acceptance_20261002.md`。
 
 完整请求已在干净源码上准备：`artifacts/p7f/p7f_diag_v1/request.json`。
-现在不需要重复audit/prepare，直接在项目根目录运行：
+本机这份请求已运行完成，以下保留实际启动命令供溯源，不需要重复执行：
 
 ```powershell
 python tools/diagnose_driver_warmup.py run --request artifacts/p7f/p7f_diag_v1/request.json --confirm-request-hash a87464d61fcf154bbc81444267ff8bf10e13ab80c09a077d72ccd2e45d76b917
 ```
 
-该哈希只对应本机这份请求。42个新回合未启动；不要同时修改源码/配置或运行训练。
+该哈希只对应本机这份请求。42个新回合已完成、0 reuse，加上42格历史引用后
+84格复算通过；aggregate SHA256为
+`9a1a37d30ec0c2181999570f9766655bc5a28179f968215ec56a57cf2f302d9e`。
+
+## 完整结果与下一步边界（2026-10-02）
+
+详见[完整复盘](../../reports/p07f_results_review_20261002.md)。发现9对近一致轨迹
+原终止标签相反。SUMO 1.22.0碰撞移除也发布ARRIVED，上游作者循环先检查arrival，
+导致native到达不能直接解释为真实成功。历史几何回查中B0种子2的20回合及
+B3种子0的11回合明显在终点前结束。旧报告不覆盖、不自动改标签，不换seed或阈值。
+
+当前先暂停按原成功率/成功条件奖励作方法结论，不重训、不扩大模型、不进入P8。
+建议新增只读原始终止事件sidecar，在清理/额外step前捕获arrived IDs、collision
+参与者和ego存在状态，验证冻结模型轨迹不变后重评。此阶段尚未实现或准备请求；
+无需重跑P7f，不存在可交付的新CLI命令，需用户另行确认后开发。
