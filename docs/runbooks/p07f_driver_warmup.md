@@ -66,3 +66,12 @@ python tools/diagnose_driver_warmup.py run --request artifacts/p7f/p7f_diag_v1/r
 舍入差异直接当语义错误，也不以该单场景作方法结论。
 不要重复audit。完整42回合尚未运行，准备后使用其新请求哈希启动。
 验收细节见`reports/p07f_driver_warmup_acceptance_20261002.md`。
+
+完整请求已在干净源码上准备：`artifacts/p7f/p7f_diag_v1/request.json`。
+现在不需要重复audit/prepare，直接在项目根目录运行：
+
+```powershell
+python tools/diagnose_driver_warmup.py run --request artifacts/p7f/p7f_diag_v1/request.json --confirm-request-hash a87464d61fcf154bbc81444267ff8bf10e13ab80c09a077d72ccd2e45d76b917
+```
+
+该哈希只对应本机这份请求。42个新回合未启动；不要同时修改源码/配置或运行训练。

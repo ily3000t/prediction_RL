@@ -26,8 +26,8 @@ delta, retraining or old-result overwrite occurred. See
 P7f now implements the user-approved driver x warmup diagnosis: Gym/author loop
 at 20/50 seconds, with the same frozen models and three preselected scenes.
 602 tests and six new bounded engineering episodes pass; all same-warmup initial
-traffic pairs match. Full evaluation contains 42 new plus 42 verified historical
-cells and is USER-run, not executed here. Native rewards/collision definitions
+traffic pairs match. The full request is prepared: 42 new plus 42 verified historical
+cells, USER-run and not executed here. Native rewards/collision definitions
 remain separate and missing historical observations remain explicitly unavailable.
 No training, formal P8 approval or protocol selection occurred. See
 [P7f acceptance](reports/p07f_driver_warmup_acceptance_20261002.md) and
