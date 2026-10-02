@@ -3,33 +3,41 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
-P7d's user-run 140-episode external comparison is now complete and verified.
-Author DDPG, ST and both original RL+MPC variants finish all 20 shared scenes;
-conditional-feature DDPG finishes 41/60 across three training seeds. Two seeds
-show comfort/reward advantages over RL+MPC, but the third parks on the ramp in
-19/20 scenes. No model was retrained; P8 is not approved. The proposed frozen
+P7d's user-run 140-episode external comparison is complete and artifact-verified.
+Its saved native labels report 20/20 arrivals for each author controller and
+41/60 for conditional DDPG. P7f now identifies collision-removal contamination
+in the author-loop arrival contract; these are NOT audited true-success counts.
+Earlier seed-0 comfort/reward interpretations are suspended pending raw-event
+audit; seed 2 still parks in 19/20 scenes. No model was retrained; P8 is not approved.
+The proposed frozen
 noise diagnostic is still DRAFT, not an implemented CLI. See the
 [full P7d result review](reports/p07d_results_review_20261001.md),
 [P7d acceptance](reports/p07d_external_baselines_acceptance_20261001.md) and
 [exact manual command/contract](docs/runbooks/p07d_external_baselines.md).
 
 P7e's 80 new episodes are now complete and verified with 200 historical references.
-Author DDPG reaches 16/20 scenes in P7 versus 20/20 in P7d; project B0 reaches
-40/60 versus 60/60 with identical frozen weights. Protocol sensitivity is therefore
-material, while B3's third seed still stalls in 19/20 scenes under both protocols.
+Saved native labels report author DDPG 16/20 in P7 versus 20/20 in P7d and
+project B0 40/60 versus 60/60 with identical weights. Protocol sensitivity is therefore
+material, but P7f shows that terminal classification, not just traffic or model
+quality, can explain apparent improvements. B3's third seed still stalls in
+19/20 scenes under both protocols.
 Native scoring/termination contracts remain separate; no cross-protocol reward
 delta, retraining or old-result overwrite occurred. See
 [completed P7e review](reports/p07e_results_review_20261002.md),
 [P7e acceptance](reports/p07e_crosscheck_acceptance_20261002.md) and
 [manual crosscheck runbook](docs/runbooks/p07e_model_protocol_crosscheck.md).
 
-P7f now implements the user-approved driver x warmup diagnosis: Gym/author loop
-at 20/50 seconds, with the same frozen models and three preselected scenes.
-602 tests and six new bounded engineering episodes pass; all same-warmup initial
-traffic pairs match. The full request is prepared: 42 new plus 42 verified historical
-cells, USER-run and not executed here. Native rewards/collision definitions
-remain separate and missing historical observations remain explicitly unavailable.
-No training, formal P8 approval or protocol selection occurred. See
+P7f's user-run driver x warmup diagnosis is complete: 42 new plus 42 verified
+historical cells, the same frozen models and three preselected scenes. All
+same-warmup initial traffic pairs match, but nine pairs have opposite native
+terminal labels despite equal control-call counts and near-identical trajectories.
+Installed SUMO 1.22.0 publishes ARRIVED for collision removal; the author loop
+checks arrival first. A historical geometry check also flags 20 B0 seed-2 and
+11 B3 seed-0 native arrivals far before the destination. Old results are preserved,
+not relabeled. Raw terminal-event audit is the next proposal, not an implemented CLI.
+No training, simulation rerun, P8 approval or favorable protocol selection occurred
+in this review; 602 tests belong to the prior engineering acceptance. See
+[completed P7f review](reports/p07f_results_review_20261002.md),
 [P7f acceptance](reports/p07f_driver_warmup_acceptance_20261002.md) and
 [manual diagnostic runbook](docs/runbooks/p07f_driver_warmup.md).
 
