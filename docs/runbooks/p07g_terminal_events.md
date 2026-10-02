@@ -47,4 +47,16 @@ python -B tools/audit_terminal_events.py run --request artifacts/p7g/p7g_diag_v1
 - 期限是仿真任务期限；背景碰撞、无法解释的移除不冒充ego碰撞/成功。
 - 不合并跨driver奖励，不按结果挑协议，不根据单次负结果换seed、模型或阈值。
 
-当前本说明是实现流程；测试/audit真实结果及精确完整请求哈希需验收后补充。
+## 已完成接入验收（2026-10-02）
+
+源码提交ba0c7da；完整回归640 passed（38项新增），两条原作者可信pickle加载警告。
+上述p7g_audit_v1已完成，不要重复执行audit。12回合原生结果及可得轨迹均严格等价；
+实际2078次控制调用、4196次原始仿真步，低于6006/8136次上限。
+6回合记录到ego碰撞与arrived重叠；其中3回合作者循环原标签为arrival。
+独立分类仅作为旁路审计，未改变奖励或终止逻辑，不是碰撞责任认定。
+
+- audit request canonical hash：23e6ba60e593ca295d1cff0bbde85b8322d9052220c9c4937f8616f12ea856f1。
+- aggregate byte SHA256：a370762a05759ae535d0a6f4ee554d4910e3288f4fc131d3413eba1827eb7134。
+- 完整验收与边界：reports/p07g_terminal_events_acceptance_20261002.md。
+
+完整84回合尚未启动；其精确请求哈希将在prepare完成后记录于本说明。

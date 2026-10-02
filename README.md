@@ -34,12 +34,21 @@ terminal labels despite equal control-call counts and near-identical trajectorie
 Installed SUMO 1.22.0 publishes ARRIVED for collision removal; the author loop
 checks arrival first. A historical geometry check also flags 20 B0 seed-2 and
 11 B3 seed-0 native arrivals far before the destination. Old results are preserved,
-not relabeled. Raw terminal-event audit is the next proposal, not an implemented CLI.
-No training, simulation rerun, P8 approval or favorable protocol selection occurred
-in this review; 602 tests belong to the prior engineering acceptance. See
+not relabeled. P7g now implements a separate raw terminal-event audit; its bounded
+12-episode acceptance preserves every native result and available trajectory.
+It confirms three native arrivals that actually involve ego collisions, while
+also confirming real 20/50-second warmup sensitivity in one conditional model.
+The full 84-episode raw audit remains user-run; no old report or reward was changed.
+The P7f result review itself did not rerun simulation, train models, approve P8
+or select a favorable protocol; its 602 tests belong to the prior acceptance. See
 [completed P7f review](reports/p07f_results_review_20261002.md),
 [P7f acceptance](reports/p07f_driver_warmup_acceptance_20261002.md) and
 [manual diagnostic runbook](docs/runbooks/p07f_driver_warmup.md).
+
+P7g passes 640 tests (38 new) and the 12-episode scene-200 interface audit.
+These are engineering/mechanism results, not a method ranking or formal test.
+See [raw-event acceptance](reports/p07g_terminal_events_acceptance_20261002.md)
+and [P7g manual commands](docs/runbooks/p07g_terminal_events.md).
 
 The earlier P7 four-arm exploratory DDPG runs and paired evaluation are complete.
 The conditional predictor improves on ordinary prediction but does not outperform
