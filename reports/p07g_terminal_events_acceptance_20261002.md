@@ -80,5 +80,9 @@ aggregate byte SHA256：a370762a05759ae535d0a6f4ee554d4910e3288f4fc131d3413eba18
 下一个prepare仅冻结请求，不运行SUMO：原三个场景200/210/219、作者一份权重、
 B0/B3各三个训练种子、四条件，共84个新raw审计回合；历史轨迹仅作等价参考。
 固定两worker、每worker一CPU Torch线程，阻塞同步计算；用户按runbook手动启动。
+已在干净提交054113e47e01e83428df485644492e567c6bf65f上完成prepare；
+artifacts/p7g/p7g_diag_v1/preparation.json状态为prepared_not_simulated、新回合84、raw复用0。
+完整请求canonical hash：1d4e443824312f75d3b46831c41d9dc938892892ed005231bf6e3d408b67fcf2。
+没有evaluate/aggregate目录或活动writer；准备不等于完成完整诊断。
 完成后统一检查双口径事件，再决定是否批准后续终止语义修订，而非立即扩大模型。
 本地原子提交、不推送、不创建论文复现里程碑标签；上游许可限制仍保留。

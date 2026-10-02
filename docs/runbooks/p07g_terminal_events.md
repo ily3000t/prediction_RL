@@ -28,7 +28,7 @@ prepare冻结完整解析配置/源码/依赖/权重/原轨迹及audit证据，�
 ## 用户运行84回合
 
 ```powershell
-python -B tools/audit_terminal_events.py run --request artifacts/p7g/p7g_diag_v1/request.json --confirm-request-hash <prepare打印的哈希>
+python -B tools/audit_terminal_events.py run --request artifacts/p7g/p7g_diag_v1/request.json --confirm-request-hash 1d4e443824312f75d3b46831c41d9dc938892892ed005231bf6e3d408b67fcf2
 ```
 
 两进程、CPU一线程、每scene独立新进程首回合。不要同时编辑代码/配置或运行训练。
@@ -59,4 +59,12 @@ python -B tools/audit_terminal_events.py run --request artifacts/p7g/p7g_diag_v1
 - aggregate byte SHA256：a370762a05759ae535d0a6f4ee554d4910e3288f4fc131d3413eba1827eb7134。
 - 完整验收与边界：reports/p07g_terminal_events_acceptance_20261002.md。
 
-完整84回合尚未启动；其精确请求哈希将在prepare完成后记录于本说明。
+## 完整请求已准备，尚未运行
+
+2026-10-02在干净文档提交054113e上完成prepare，84个新任务、两个worker，
+旧回合只作等价参考，raw事件复用数量为0。没有启动SUMO，没有evaluate或aggregate产物。
+请求：artifacts/p7g/p7g_diag_v1/request.json。
+canonical hash：1d4e443824312f75d3b46831c41d9dc938892892ed005231bf6e3d408b67fcf2。
+不要再次执行audit或prepare；直接在E:/Prediction_RL的pytorch环境执行上方run命令。
+运行完成输出artifacts/p7g/p7g_diag_v1/aggregate.json；其负结果也正常完成聚合。
+仅文档提交和分支合并不改变冻结的Python源码指纹；不要修改配置、依赖或权重。

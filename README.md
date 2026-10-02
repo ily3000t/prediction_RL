@@ -38,7 +38,8 @@ not relabeled. P7g now implements a separate raw terminal-event audit; its bound
 12-episode acceptance preserves every native result and available trajectory.
 It confirms three native arrivals that actually involve ego collisions, while
 also confirming real 20/50-second warmup sensitivity in one conditional model.
-The full 84-episode raw audit remains user-run; no old report or reward was changed.
+The full 84-episode raw audit is prepared but not started and remains user-run;
+no old report or reward was changed.
 The P7f result review itself did not rerun simulation, train models, approve P8
 or select a favorable protocol; its 602 tests belong to the prior acceptance. See
 [completed P7f review](reports/p07f_results_review_20261002.md),
