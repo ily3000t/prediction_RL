@@ -80,18 +80,22 @@ python tools/crosscheck_model_protocols.py run --request artifacts/p7e/p7e_cross
 - 不把停车的低jerk、早碰撞的短耗时当作舒适性或效率提升。
 - 作者只有一份权重，训练预算未匹配；工程complete不代表方法获胜、收敛或正式泛化。
 
-完整80回合未执行前，不能据工程验收评价方法。下一步需先复盘结果；
-P7c噪声诊断仍未实施，P8未批准。
+完整80回合已完成，结果复盘见`reports/p07e_results_review_20261002.md`。
+优先考虑分离评价循环与预热时间的短诊断，不能仅选择表现较好的协议。
+该诊断尚未实现或批准；P7c噪声诊断仍为草案，P8未批准。
 
-## 本机已准备状态（2026-10-02）
+## 本机已完成状态（2026-10-02）
 
 场景200工程验收已完成，四回合共940次实际控制调用，工程完整性通过。
-完整80回合请求也已准备；现在不要重复audit/prepare，也不需要重新训练。
-在项目根目录直接运行：
+用户随后完成80个新增回合：80 run、0 reuse，共17,884次实际控制调用，
+约55.5分钟。已核验全部收据、模型/源码绑定，并复算280条总表统计。
+不要重复audit/prepare/run，不需要重新训练。本次已完成的命令为：
 
 ```powershell
 python tools/crosscheck_model_protocols.py run --request artifacts/p7e/p7e_cross_v1/request.json --confirm-request-hash f50f32e772fa47c8195e39ecf93fb8153cf989720f2e05be5260840e82bab5de
 ```
 
-该哈希仅对应这份本机冻结请求。当前80回合没有启动，也没有完整方法结果。
-工程记录见`reports/p07e_crosscheck_acceptance_20261002.md`。
+该哈希仅对应这份本机冻结请求。完整结果为
+`artifacts/p7e/p7e_cross_v1/aggregate.json`，工程complete不代表方法效果通过。
+原工程记录`reports/p07e_crosscheck_acceptance_20261002.md`保留准备时状态，
+完整分析见`reports/p07e_results_review_20261002.md`。
