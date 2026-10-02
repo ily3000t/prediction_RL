@@ -82,3 +82,16 @@ python tools/crosscheck_model_protocols.py run --request artifacts/p7e/p7e_cross
 
 完整80回合未执行前，不能据工程验收评价方法。下一步需先复盘结果；
 P7c噪声诊断仍未实施，P8未批准。
+
+## 本机已准备状态（2026-10-02）
+
+场景200工程验收已完成，四回合共940次实际控制调用，工程完整性通过。
+完整80回合请求也已准备；现在不要重复audit/prepare，也不需要重新训练。
+在项目根目录直接运行：
+
+```powershell
+python tools/crosscheck_model_protocols.py run --request artifacts/p7e/p7e_cross_v1/request.json --confirm-request-hash f50f32e772fa47c8195e39ecf93fb8153cf989720f2e05be5260840e82bab5de
+```
+
+该哈希仅对应这份本机冻结请求。当前80回合没有启动，也没有完整方法结果。
+工程记录见`reports/p07e_crosscheck_acceptance_20261002.md`。

@@ -13,6 +13,14 @@ noise diagnostic is still DRAFT, not an implemented CLI. See the
 [P7d acceptance](reports/p07d_external_baselines_acceptance_20261001.md) and
 [exact manual command/contract](docs/runbooks/p07d_external_baselines.md).
 
+P7e now completes the missing model-origin x protocol interfaces without replacing
+P7 baselines: four scene-200 engineering episodes pass; the 80-new-episode request
+is prepared, **not run**. It references 200 verified historical episodes, keeps
+the two native scoring/termination contracts separate, and computes no
+cross-protocol reward delta. No weights were retrained or old results overwritten.
+See [P7e acceptance](reports/p07e_crosscheck_acceptance_20261002.md) and
+[manual crosscheck runbook](docs/runbooks/p07e_model_protocol_crosscheck.md).
+
 The earlier P7 four-arm exploratory DDPG runs and paired evaluation are complete.
 The conditional predictor improves on ordinary prediction but does not outperform
 the matched zero-channel control. Formal P8 freeze is not recommended yet; see
