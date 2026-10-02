@@ -57,3 +57,12 @@ python tools/diagnose_driver_warmup.py run --request artifacts/p7f/p7f_diag_v1/r
 - 碰撞仍是不同原生判定；500/501调用与评分差异保留，不能直接称统一ego碰撞率。
 - time_limit是仿真期限，不是wall-clock超时。负结果正常complete，不放宽gate。
 - 只检查协议敏感性，不选择最好协议、不挑训练seed；训练/模型扩展/P8须另行确认。
+
+## 本机工程验收状态（2026-10-02）
+
+源码提交62d1798；602项测试通过（新增33项）。上述工程audit已完成：
+6个新回合、6个历史引用、1473次实际控制调用，engineering_complete=true。
+三模型的相同预热初始共同交通均一致；后续轨迹逐位差异仍保留，不将数值
+舍入差异直接当语义错误，也不以该单场景作方法结论。
+不要重复audit。完整42回合尚未运行，准备后使用其新请求哈希启动。
+验收细节见`reports/p07f_driver_warmup_acceptance_20261002.md`。
