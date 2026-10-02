@@ -1,0 +1,71 @@
+{
+  "version": "p07f_driver_warmup_v1",
+  "purpose": "bounded_development_driver_x_warmup_diagnosis",
+  "crosscheck_request": "artifacts/p7e/p7e_cross_v1/request.json",
+  "crosscheck_request_hash": "f50f32e772fa47c8195e39ecf93fb8153cf989720f2e05be5260840e82bab5de",
+  "crosscheck_aggregate_sha256": "f16aac96b72654e2f3b3a0c60b396596c4c61458bff1f53c67cd3570b461ae86",
+  "recording_request": "artifacts/p7b/p7b_diag_v1/request.json",
+  "recording_request_hash": "98d221e3b8ee24aab965189cc2e2acd5db1f3dd4f7a6b6bf1789dc9fcae91f5f",
+  "recording_summary_sha256": "9cd83601e61ac2dd736cc48293d479b9c2dca8f1b72f50b870645ed9c051b040",
+  "models": [
+    "author_pretrained_ddpg",
+    "project_20k_b0_ddpg",
+    "project_20k_b3_conditional_ddpg"
+  ],
+  "project_run_seeds": [
+    0,
+    1,
+    2
+  ],
+  "simulator_seeds": [
+    200,
+    210,
+    219
+  ],
+  "scene_selection": "unchanged_pre_result_p7b_first_midpoint_last",
+  "conditions": {
+    "gym20": {
+      "driver": "gym",
+      "warmup_s": 20,
+      "max_control_calls": 500,
+      "score": "gym_transition_return",
+      "collision": "original_just_had_collision_and_ego_absent"
+    },
+    "gym50": {
+      "driver": "gym",
+      "warmup_s": 50,
+      "max_control_calls": 500,
+      "score": "gym_transition_return",
+      "collision": "original_just_had_collision_and_ego_absent"
+    },
+    "author20": {
+      "driver": "author",
+      "warmup_s": 20,
+      "max_control_calls": 501,
+      "score": "author_history_total_reward",
+      "collision": "original_any_vehicle_collision_check"
+    },
+    "author50": {
+      "driver": "author",
+      "warmup_s": 50,
+      "max_control_calls": 501,
+      "score": "author_history_total_reward",
+      "collision": "original_any_vehicle_collision_check"
+    }
+  },
+  "episodes_per_seed": 1,
+  "scene_execution": "fresh_process_first_episode_per_simulator_seed",
+  "execution_contract": "simulation_blocking_exact_v1",
+  "inference_device": "cpu",
+  "workers": 2,
+  "torch_threads": 1,
+  "policy": "frozen_deterministic_no_exploration",
+  "checkpoint_selection": "unchanged_author_asset_and_p7_final_no_selection",
+  "training_permitted": false,
+  "formal_claim": false,
+  "test_opened": false,
+  "budget_matched": false,
+  "cross_driver_reward_delta": false,
+  "analysis": "native_events_and_common_recorded_state_action_prefix_not_formal_method_ranking",
+  "historical_missing_observations": "explicit_null_no_synthetic_reconstruction"
+}
