@@ -38,18 +38,23 @@ not relabeled. P7g now implements a separate raw terminal-event audit; its bound
 12-episode acceptance preserves every native result and available trajectory.
 It confirms three native arrivals that actually involve ego collisions, while
 also confirming real 20/50-second warmup sensitivity in one conditional model.
-The full 84-episode raw audit is prepared but not started and remains user-run;
-no old report or reward was changed.
+The user-run full raw audit stopped after 72 complete cells and two fully
+recorded author time-limit cells hit a v1 analysis defect; ten cells are missing.
+No old report or reward was changed.
 The P7f result review itself did not rerun simulation, train models, approve P8
 or select a favorable protocol; its 602 tests belong to the prior acceptance. See
 [completed P7f review](reports/p07f_results_review_20261002.md),
 [P7f acceptance](reports/p07f_driver_warmup_acceptance_20261002.md) and
 [manual diagnostic runbook](docs/runbooks/p07f_driver_warmup.md).
 
-P7g passes 640 tests (38 new) and the 12-episode scene-200 interface audit.
-These are engineering/mechanism results, not a method ranking or formal test.
-See [raw-event acceptance](reports/p07g_terminal_events_acceptance_20261002.md)
-and [P7g manual commands](docs/runbooks/p07g_terminal_events.md).
+P7g's separate v2 analysis fixes the cancelled final author command without
+editing v1 source or raw artifacts. All 74 recorded cells have been revalidated;
+the two analysis failures remain time-limit negative results. The 692-test
+regression passes, and a recovery request for ONLY the ten missing simulations
+is prepared but not run. These are engineering/mechanism results, not a method
+ranking or formal test. See [v1 acceptance](reports/p07g_terminal_events_acceptance_20261002.md),
+[v2 recovery acceptance](reports/p07g_time_limit_recovery_acceptance_20261003.md)
+and [current manual command](docs/runbooks/p07g_time_limit_recovery.md).
 
 The earlier P7 four-arm exploratory DDPG runs and paired evaluation are complete.
 The conditional predictor improves on ordinary prediction but does not outperform
