@@ -13,12 +13,15 @@ noise diagnostic is still DRAFT, not an implemented CLI. See the
 [P7d acceptance](reports/p07d_external_baselines_acceptance_20261001.md) and
 [exact manual command/contract](docs/runbooks/p07d_external_baselines.md).
 
-P7e now completes the missing model-origin x protocol interfaces without replacing
-P7 baselines: four scene-200 engineering episodes pass; the 80-new-episode request
-is prepared, **not run**. It references 200 verified historical episodes, keeps
-the two native scoring/termination contracts separate, and computes no
-cross-protocol reward delta. No weights were retrained or old results overwritten.
-See [P7e acceptance](reports/p07e_crosscheck_acceptance_20261002.md) and
+P7e's 80 new episodes are now complete and verified with 200 historical references.
+Author DDPG reaches 16/20 scenes in P7 versus 20/20 in P7d; project B0 reaches
+40/60 versus 60/60 with identical frozen weights. Protocol sensitivity is therefore
+material, while B3's third seed still stalls in 19/20 scenes under both protocols.
+Native scoring/termination contracts remain separate; no cross-protocol reward
+delta, retraining or old-result overwrite occurred. A controlled driver x warmup
+diagnostic is recommended before training/model changes, but is not implemented
+or approved. See [completed P7e review](reports/p07e_results_review_20261002.md),
+[P7e acceptance](reports/p07e_crosscheck_acceptance_20261002.md) and
 [manual crosscheck runbook](docs/runbooks/p07e_model_protocol_crosscheck.md).
 
 The earlier P7 four-arm exploratory DDPG runs and paired evaluation are complete.
