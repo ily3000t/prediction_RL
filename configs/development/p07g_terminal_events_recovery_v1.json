@@ -1,0 +1,18 @@
+{
+  "version": "p07g_terminal_events_recovery_v1",
+  "analysis_implementation": "p07g_raw_terminal_analysis_v2",
+  "source_request": "artifacts/p7g/p7g_diag_v1/request.json",
+  "source_request_hash": "1d4e443824312f75d3b46831c41d9dc938892892ed005231bf6e3d408b67fcf2",
+  "source_execution_commit": "e327fb38ddf1ca7e4f329256a3b5e585087d2965",
+  "source_invocation": "artifacts/p7g/p7g_diag_v1/invocations/15ba5bc958d9/report.json",
+  "expected_completed_cells": 72,
+  "recoverable_analysis_failure_ids": [
+    "project_20k_b3_conditional_ddpg_author20_r2_v200",
+    "project_20k_b3_conditional_ddpg_author20_r2_v210"
+  ],
+  "expected_new_simulations": 10,
+  "preserve_source_artifacts": true,
+  "reward_action_termination_changes": false,
+  "training_permitted": false,
+  "reason": "author_time_limit_final_command_removed_before_cleanup_step"
+}

@@ -1,5 +1,9 @@
 # P7g 原始终止事件审计运行说明
 
+2026-10-03后续状态：完整v1请求在72个complete、2个时限分支分析失败后停止，
+仍有10回合未启动。以下命令保留为历史记录，不要删除失败目录或继续运行v1。
+已修复并准备独立恢复请求；当前请使用docs/runbooks/p07g_time_limit_recovery.md。
+
 项目根目录E:/Prediction_RL，激活pytorch；无训练步骤。
 配置：configs/development/p07g_terminal_events_v1.json（独立可读、未知字段拒绝）。
 入口：tools/audit_terminal_events.py。
