@@ -1,0 +1,31 @@
+{
+  "version": "p07e_model_protocol_crosscheck_v1",
+  "purpose": "development_model_origin_x_protocol_sensitivity",
+  "parent_request": "artifacts/p7/p7_explore_v1/request.json",
+  "parent_request_hash": "d068c069334874d668bcdbe32c7e62a42b997c40d151feb099794d50fcb7833f",
+  "parent_aggregate_sha256": "c6ffb04656ad349442814ddde6b768a361b47bc6edfeeab1c061886281f960bb",
+  "external_request": "artifacts/p7d/p7d_compare_v1/request.json",
+  "external_request_hash": "18a2434c49a9f44ff27b0b0e27221b2d1914af2703373bd606609febac0a67e3",
+  "external_aggregate_sha256": "fd1b48fd262aa676e4c1cb1e56b64adc17e921a58924562503eb104fdd2aaeec",
+  "models": ["author_pretrained_ddpg", "project_20k_b0_ddpg", "project_20k_b3_conditional_ddpg"],
+  "drivers": ["p7_gym20", "p7d_author50"],
+  "project_run_seeds": [0, 1, 2],
+  "simulator_seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219],
+  "episodes_per_seed": 1,
+  "scene_execution": "fresh_process_first_episode_per_simulator_seed",
+  "driver_contracts": {
+    "p7_gym20": {"driver": "unchanged_p7_gym", "warmup_s": 20, "max_control_calls": 500, "score": "gym_transition_return", "collision": "original_just_had_collision_and_ego_absent"},
+    "p7d_author50": {"driver": "unchanged_upstream_control_run_episode", "warmup_s": 50, "max_control_calls": 501, "score": "author_history_total_reward", "collision": "original_any_vehicle_collision_check"}
+  },
+  "execution_contract": "simulation_blocking_exact_v1",
+  "inference_device": "cpu",
+  "torch_threads": 1,
+  "workers": 2,
+  "checkpoint_selection": "unchanged_author_asset_and_p7_final_no_selection",
+  "training_permitted": false,
+  "budget_matched": false,
+  "formal_claim": false,
+  "test_opened": false,
+  "cross_protocol_analysis": "same_seed_native_event_sensitivity_not_identical_traffic_or_causal_warmup_effect",
+  "cross_protocol_reward_delta": false
+}
