@@ -163,3 +163,28 @@ def test_cli_budget_is_bounded_and_config_matches():
     assert CONFIG['max_training_transitions_per_job']==CONFIG['requested_frames']+499
     assert CONFIG['max_frozen_control_steps']==2*3*500
     assert len(JOBS)==7
+
+
+def test_original_replay_sampling_shares_numpy_rng_with_later_reset_speed():
+    from all.memory import ExperienceReplayBuffer
+    b=ExperienceReplayBuffer(20)
+    s=State(torch.zeros(1,1),torch.ones(1,dtype=torch.uint8))
+    for _ in range(10): b.store(s,torch.zeros(1,1),0.,s)
+    saved=np.random.get_state()
+    try:
+        np.random.seed(200); reference=[float(np.random.normal(15,5)) for _ in range(3)]
+        np.random.seed(200); first=float(np.random.normal(15,5)); b.sample(8)
+        sampled=[first,float(np.random.normal(15,5)),float(np.random.normal(15,5))]
+        # NumPy's second cached normal draw is unchanged; later draws depend on
+        # replay sampling. This is inherited behavior, not an audit side effect.
+        assert sampled[:2]==reference[:2] and sampled[2]!=reference[2]
+    finally: np.random.set_state(saved)
+
+
+def test_reset_jump_does_not_count_as_recovery_acceleration():
+    raw=SyntheticEnv('baseline');obs,info=raw.reset()
+    from prediction_rl.evaluation.training_contract import state_measurement
+    first={**state_measurement(obs,info),'episode':0,'event':'step'}
+    first['ego']['speed']=0.
+    second=deepcopy(first);second['ego']['speed']=15.;second['episode']=1;second['event']='reset'
+    assert coverage([first,second])['low_speed_to_moving_transitions']==0
