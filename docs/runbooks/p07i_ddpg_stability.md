@@ -75,3 +75,17 @@ python -B tools/diagnose_ddpg_stability.py audit --run-id p7i_audit_01
 
 四组、训练种子 2、场景 200、确定性与一个噪声重复，最多 8 回合/4,000 步。
 这是预先固定的失败路径覆盖，不作为方法效果依据。
+
+## 本机已准备的完整请求（2026-10-03）
+
+工程验收：738 项完整回归、8 回合真实 smoke、complete-only resume 均通过。
+完整请求已经准备，尚未启动；无需再次 prepare 或重新训练，可直接执行：
+
+```powershell
+cd E:\Prediction_RL
+python -B tools/diagnose_ddpg_stability.py run --request artifacts/p7i/p7i_diag_v1/request.json --confirm-request-hash eb52a72518773039aca4b6de215d2667fdec40ba02255886293b76cdd0c7299a
+```
+
+正常中断后需要继续时，在同一命令后加 `--resume`；失败/不完整单元依然
+不会被重试或覆盖。完整结束后的报告：artifacts/p7i/p7i_diag_v1/aggregate.json。
+验收记录：[P7i acceptance](../../reports/p07i_ddpg_stability_acceptance_20261003.md)。
