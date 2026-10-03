@@ -1,0 +1,29 @@
+{
+  "version": "p07k_matched_60k_v1",
+  "purpose": "bounded_matched_development_learning_curve",
+  "arms": ["baseline", "zero", "ordinary", "conditional"],
+  "training": {
+    "run_seeds": [0, 1, 2], "checkpoint_frames": [20000, 40000, 60000],
+    "requested_frames": 60000, "workers": 1, "device": "cpu", "torch_threads": 1,
+    "learning_rate": 0.0002, "warm_start": false, "replay_start_size": 5000, "minibatch_size": 100
+  },
+  "evaluation": {
+    "simulator_seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219],
+    "workers": 2, "episodes_per_seed": 1, "policy": "deterministic_no_exploration",
+    "protocol": "gym20_fresh_process_first_episode"
+  },
+  "checkpoint_rule": "first_completed_episode_at_or_after_requested_node",
+  "selection": "final_60k_primary_earlier_nodes_diagnostic_no_best_selection",
+  "reset_contract": "upstream_continuing_traffic_v1",
+  "execution_contract": "simulation_blocking_exact_v1",
+  "event_contract": "raw_ego_participant_and_route_endpoint_v2",
+  "action_saturation_threshold": 4.99, "low_speed_mps": 0.1,
+  "comparisons": [
+    {"id": "input_capacity", "left": "baseline", "right": "zero"},
+    {"id": "ordinary_information", "left": "zero", "right": "ordinary"},
+    {"id": "action_conditioning", "left": "ordinary", "right": "conditional"},
+    {"id": "total_augmentation", "left": "baseline", "right": "conditional"}
+  ],
+  "aggregation": "scene_paired_within_training_seed_then_equal_training_seed_mean",
+  "from_scratch": true, "automatic_budget_extension": false, "formal_claim": false, "test_opened": false
+}
