@@ -3,6 +3,18 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+P7k now implements the approved bounded, from-scratch matched learning-curve
+experiment: B0/B1/B2/B3, training seeds 0/1/2, continuous 20k/40k/60k snapshots,
+and independent fresh-process Gym20 development evaluation on scenes 200–219.
+The original reward, action, reset/RNG coupling and DDPG schedule are unchanged.
+Actual replay/minibatch coverage and raw ego events are saved; noisy training
+returns and frozen-policy development curves are separate. All 781 regression
+tests and the four-training/twelve-evaluation bounded SUMO smoke pass.
+The full 12-instance / 720-evaluation experiment has NOT been run by the agent;
+it remains user-run, with no automatic budget extension or formal/P8 approval.
+See [P7k acceptance](reports/p07k_matched_learning_curve_acceptance_20261003.md)
+and [exact training/evaluation commands](docs/runbooks/p07k_matched_learning_curve.md).
+
 P7d's user-run 140-episode external comparison is complete and artifact-verified.
 Its saved native labels report 20/20 arrivals for each author controller and
 41/60 for conditional DDPG. P7f now identifies collision-removal contamination
