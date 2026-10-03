@@ -1,0 +1,22 @@
+{
+  "version": "p07j_training_contract_v1",
+  "purpose": "bounded_pre_60k_semantics_and_distribution_audit",
+  "training_arms": ["baseline", "zero", "ordinary", "conditional"],
+  "training_seed": 2,
+  "requested_frames": 64,
+  "episode_cap": 2,
+  "smoke_overrides": {"replay_start_size": 8, "minibatch_size": 8},
+  "frozen_arms": ["zero", "conditional"],
+  "frozen_training_seed": 2,
+  "continuing_simulator_seed": 200,
+  "continuing_episodes": 3,
+  "initial_census_seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219],
+  "workers": 2,
+  "torch_threads": 1,
+  "max_training_transitions_per_job": 563,
+  "max_frozen_control_steps": 3000,
+  "execution_contract": "simulation_blocking_exact_v1",
+  "training_60k_authorized": false,
+  "formal_claim": false,
+  "test_opened": false
+}
