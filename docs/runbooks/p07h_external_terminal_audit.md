@@ -39,15 +39,15 @@ python -B tools/audit_external_terminal_events.py prepare --run-id p7h_external_
 
 验证原20场景参考、模型、历史收据、完整P7g、接口审计以及原始事件后，
 冻结不可变request/source_manifest并打印confirm_request_hash。
-已准备的请求不要重复prepare。完成验收后实际hash会记录在交接信息中。
+此请求已于2026-10-03准备完成，用户不要重复prepare。
 
 ## 用户运行完整评价
 
 ```powershell
-python -B tools/audit_external_terminal_events.py run --request artifacts/p7h/p7h_external_v1/request.json --confirm-request-hash <prepare打印的实际hash>
+python -B tools/audit_external_terminal_events.py run --request artifacts/p7h/p7h_external_v1/request.json --confirm-request-hash 1d0a82748693e00aa3105bf2325248a981a25c39832c6f91b6e17a811f99f855
 ```
 
-命令中的占位值必须替换。2个独立进程worker，每个Torch一CPU线程。
+2个独立进程worker，每个Torch一CPU线程。
 不并行训练/修改源码/配置/原结果。运行结束自动聚合，不再另行aggregate。
 断点续跑仅对已验证完整回合允许加--resume；不完整或失败目录直接暂停，
 不会删除或覆盖，也不会静默换seed。
@@ -68,3 +68,19 @@ python -B tools/audit_external_terminal_events.py run --request artifacts/p7h/p7
 
 完成此报告后再诊断DDPG训练稳定性、B1/B2/B3特征利用。
 本轮没有证明20k收敛，也没有开启P8、重新训练或加大预测网络。
+
+## 已完成验收（2026-10-03）
+
+- 完整回归727 passed，2条既有可信作者pickle加载警告；没有安装或修改依赖。
+- 20场景200格历史来源核验通过；21条旧raw来源/收据/新参考parity通过。
+- 场景200有界审计7格完整：4旧raw复用、ST/两个MPC共3新回合。
+- ST及两种MPC均独立自然到达，原native奖励/轨迹/查询/接管完全一致。
+- 旧B0种子2及B3种子0碰撞、B3种子2任务超时仍保留；不将负结果修成通过。
+- 完整请求200格：21条P7g和3条P7h raw复用，176新回合待用户运行。
+- 完整请求没有evaluate/invocations，不启动完整评价或训练。
+
+request canonical hash：1d0a82748693e00aa3105bf2325248a981a25c39832c6f91b6e17a811f99f855。
+source_manifest SHA256：91aff7c22e597cd85ff0ffb8b9855d478b8e9c226b59a9df87ddfd7f11d6d4c2。
+完整请求准备提交：721295d00ffc2feadcfe45f10d088a40b3d93c97；
+后续纯文档提交/普通merge不改变冻结的运行源码指纹。
+验收记录：reports/p07h_external_terminal_audit_acceptance_20261003.md。
