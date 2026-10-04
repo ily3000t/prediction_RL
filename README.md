@@ -3,6 +3,14 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+The user's full P7k matched experiment is now complete and receipt-verified:
+12 from-scratch trainings, 720,412 actual control steps, and 720 frozen Gym20
+development episodes (only 20 unique traffic scenarios). At the predefined 60k
+endpoint B3 improves over B0 but not over B2; B3's formerly parking third seed
+recovers, while another seed regresses from 40k. No automatic training extension,
+architecture/reward change or P8 approval follows. See the
+[completed P7k result review](reports/p07k_results_review_20261004.md).
+
 P7k now implements the approved bounded, from-scratch matched learning-curve
 experiment: B0/B1/B2/B3, training seeds 0/1/2, continuous 20k/40k/60k snapshots,
 and independent fresh-process Gym20 development evaluation on scenes 200–219.
