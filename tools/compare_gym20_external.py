@@ -120,11 +120,19 @@ def binding(q, job):
     return {'request_hash': digest(q), 'stage': 'gym20_external_evaluation', 'job': job}
 
 
+def controller_environment(base):
+    env = make_all_environment(PredictionFeatureEnv(base, 'baseline'), 'cpu')
+    # Unlike DDPG's env.reset(), speed-controller reset is owned by the base.
+    # Initialize ALL's uint8 masks without resetting SUMO or querying policy.
+    env._lazy_init()
+    return env
+
+
 def prepare(config_path, run_id, adapter_audit=None):
     shared.clean(); torch.set_num_threads(1)
     p = AUDIT if config_path is None else validate_protocol(read(inside(ROOT, config_path)))
     inputs, project = parent_evidence(verify_files=True)
-    evidence = None if p == AUDIT else audit_evidence(adapter_audit or 'artifacts/p7l/p7l_audit_v1/aggregate.json')
+    evidence = None if p == AUDIT else audit_evidence(adapter_audit or 'artifacts/p7l/p7l_audit_v2/aggregate.json')
     settings_hashes = []
     for arm in AUTHORS:
         with upstream_session(original.SOURCE, original.SOURCE/'configs'/CONFIGS[arm], 200) as settings:
@@ -190,7 +198,7 @@ def episode(q, job, *, observed=True):
                     {'arm': 'baseline'}, None, record)
             else:
                 speed_base = Gym20SpeedControllerEnv(settings)
-                env = make_all_environment(PredictionFeatureEnv(speed_base, 'baseline'), 'cpu')
+                env = controller_environment(speed_base)
             try:
                 before = None; virtual_queries = []
                 if job['arm'] != 'author_st':
@@ -378,7 +386,7 @@ def run(path, expected, resume=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__); sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('prepare'); p.add_argument('--config', default='configs/development/p07l_gym20_external_v1.json')
-    p.add_argument('--run-id', required=True); p.add_argument('--adapter-audit', default='artifacts/p7l/p7l_audit_v1/aggregate.json')
+    p.add_argument('--run-id', required=True); p.add_argument('--adapter-audit', default='artifacts/p7l/p7l_audit_v2/aggregate.json')
     for name in ('run', 'worker', 'aggregate'):
         p = sub.add_parser(name); p.add_argument('--request', required=True); p.add_argument('--confirm-request-hash', required=True)
         if name == 'worker': p.add_argument('--job', required=True)

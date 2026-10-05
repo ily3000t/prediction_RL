@@ -19,7 +19,7 @@
 ## 有界工程验收（最多八回合，非完整实验）
 
 ```powershell
-python -B tools/compare_gym20_external.py audit --run-id p7l_audit_v1
+python -B tools/compare_gym20_external.py audit --run-id p7l_audit_v2
 ```
 
 仅场景 200，四控制器各一次无 observer 参考和一次带 observer 重放。
@@ -28,7 +28,7 @@ python -B tools/compare_gym20_external.py audit --run-id p7l_audit_v1
 ## 用户启动完整比较
 
 ```powershell
-python -B tools/compare_gym20_external.py prepare --config configs/development/p07l_gym20_external_v1.json --run-id p7l_gym20_v1 --adapter-audit artifacts/p7l/p7l_audit_v1/aggregate.json
+python -B tools/compare_gym20_external.py prepare --config configs/development/p07l_gym20_external_v1.json --run-id p7l_gym20_v1 --adapter-audit artifacts/p7l/p7l_audit_v2/aggregate.json
 ```
 
 记录打印的 `confirm_request_hash`，将下面占位符替换为该值：

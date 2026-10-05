@@ -5,6 +5,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+import numpy as np
+import torch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'src'), str(ROOT/'tools')]
@@ -125,3 +127,24 @@ def test_only_recording_fields_may_differ_in_adapter_parity():
     assert runner.assert_adapter_parity(x, y) is True
     y['query_counts'] = [1]
     with pytest.raises(ValueError): runner.assert_adapter_parity(x, y)
+
+
+def test_speed_owned_reset_still_initializes_all_terminal_masks_without_an_extra_reset():
+    from gym.spaces import Box
+    from all.bodies.time import TimeFeature
+    class Base:
+        execution_contract = 'simulation_blocking_exact_v1'
+        observation_space = Box(-np.ones(20, np.float32), np.ones(20, np.float32))
+        action_space = Box(np.array([-5.], np.float32), np.array([5.], np.float32))
+        def reset(self): raise AssertionError('Do not reset SUMO to initialize network masks')
+    class Agent:
+        def eval(self, state, reward): return torch.zeros(1, 1)
+    env = runner.controller_environment(Base()); body = TimeFeature(Agent())
+    live = env._make_state(np.zeros(20), False)
+    terminal = env._make_state(np.zeros(20), True)
+    assert live.mask.dtype == torch.uint8 and live.mask.item() == 1
+    assert terminal.mask.dtype == torch.uint8 and terminal.mask.item() == 0
+    body.eval(live, 0.); body.eval(live, 0.)
+    assert body.timestep.item() == 2
+    body.eval(terminal, 0.)
+    assert body.timestep.item() == 0
