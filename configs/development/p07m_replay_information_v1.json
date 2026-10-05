@@ -1,0 +1,32 @@
+{
+  "version": "p07m_replay_information_v1",
+  "purpose": "read_only_information_utilization_diagnostic",
+  "parent_request": "artifacts/p7k/p7k_60k_v1/request.json",
+  "parent_request_hash": "c7e352fb4e760cfc918e7b69fbe81d6ac4cba1b6b93641ad8a12afe236c5c09a",
+  "external_aggregate": "artifacts/p7l/p7l_gym20_v1/aggregate.json",
+  "external_aggregate_sha256": "7db4556335191e5617774fd047dd9ed682718c06b18dfd06e110caed84bdf33f",
+  "external_request_hash": "b9edb8adf4e8de45c0c04fdcbedc93c0f5a99df3ec4a39f25049c9fb0435eada",
+  "arms": ["ordinary", "conditional"],
+  "run_seeds": [0, 1, 2],
+  "checkpoint_frames": 60000,
+  "sample": {
+    "uniform_cap": 512,
+    "stratum_cap": 128,
+    "scan_prefix": null,
+    "selection": "smallest_sha256_job_transition_id_v1",
+    "strata": ["low_speed", "early_ramp", "short_history", "omitted_present"],
+    "low_speed_max_mps": 0.1,
+    "short_history_frames": 11
+  },
+  "perturbations": ["zero_all_prediction", "zero_values_keep_metadata", "candidate_mean_keep_metadata"],
+  "action_change_reference_mps3": 0.1,
+  "batch_size": 64,
+  "equivalence_atol": 0.00001,
+  "equivalence_rtol": 0.00001,
+  "device": "cpu",
+  "torch_threads": 1,
+  "training_permitted": false,
+  "simulation_permitted": false,
+  "test_opened": false,
+  "automatic_budget_extension": false
+}

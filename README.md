@@ -3,6 +3,18 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+P7m adds one bounded, read-only replay information-utilization diagnostic for
+the frozen 60k ordinary/conditional actors and all three training seeds.
+It separates whole-channel dependence, forecast-value dependence and candidate
+contrast sensitivity, without claiming causal benefit or prediction-error
+attribution. No SUMO, training, reward change or automatic 120k approval.
+All 835 tests and the six-checkpoint bounded replay smoke pass; completed
+smoke artifacts also pass verified reuse without re-querying. Full replay
+diagnosis remains user-run. See
+[acceptance](reports/p07m_replay_information_acceptance_20261005.md),
+[scope](docs/tasks/p07m_replay_information.md) and
+[manual diagnostic commands](docs/runbooks/p07m_replay_information.md).
+
 P7l adds the separate Gym20-adapted author DDPG/ST/RL+MPC comparison against
 the existing P7k 60k endpoint. Native planner speed commands and virtual policy
 queries are retained; Author50 results are not mixed. All 808 tests and the
