@@ -3,6 +3,16 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+P7l adds the separate Gym20-adapted author DDPG/ST/RL+MPC comparison against
+the existing P7k 60k endpoint. Native planner speed commands and virtual policy
+queries are retained; Author50 results are not mixed. All 808 tests and the
+four-controller reference/replay audit pass. The first mask-initialization
+failure is preserved, not overwritten. Full evaluation remains user-run:
+80 new author episodes plus 240 verified existing project episodes, without
+training, model upgrades or automatic 120k approval. See
+[P7l acceptance](reports/p07l_gym20_external_acceptance_20261005.md) and
+[manual Gym20 comparison](docs/runbooks/p07l_gym20_external.md).
+
 The user's full P7k matched experiment is now complete and receipt-verified:
 12 from-scratch trainings, 720,412 actual control steps, and 720 frozen Gym20
 development episodes (only 20 unique traffic scenarios). At the predefined 60k
