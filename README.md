@@ -3,6 +3,15 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+P7n provides the approved one-off 120k matched development experiment, not a
+weights-only continuation or automatic budget extension. All four arms and
+three training seeds start from scratch; frozen predictors and the immutable
+P7k training/Gym20 execution kernels are reused. The 120k endpoint is primary;
+20k/40k/60k nodes are diagnostic, with no best-checkpoint selection. Full
+training/evaluation remain user-run. See
+[scope](docs/tasks/p07n_fixed120k_matched.md) and
+[commands](docs/runbooks/p07n_fixed120k_matched.md).
+
 P7m adds one bounded, read-only replay information-utilization diagnostic for
 the frozen 60k ordinary/conditional actors and all three training seeds.
 It separates whole-channel dependence, forecast-value dependence and candidate
