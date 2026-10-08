@@ -154,15 +154,20 @@ class TrainingRecorder:
                 'training_returns_are_exploration_not_validation': True}
 
 
-def train_job(q, job, out):
-    p = q['protocol']; t = p['training']; provider, predictor_sha = original.provider_for(q, job['arm'])
+def train_job(q, job, out, *, execution=None):
+    # Explicit opt-in context; legacy callers retain the original execution path.
+    context = original if execution is None else execution
+    source = original.SOURCE if execution is None else execution.source
+    upstream = original.UPSTREAM if execution is None else execution.upstream
+    smoke_run = q['protocol'] == SMOKE if execution is None else execution.smoke
+    p = q['protocol']; t = p['training']; provider, predictor_sha = context.provider_for(q, job['arm'])
     frozen = None if provider is None else smoke.tensor_hash(provider.model.state_dict())
-    with upstream_session(original.SOURCE, original.UPSTREAM, job['run_seed']) as settings:
+    with upstream_session(source, upstream, job['run_seed']) as settings:
         import control, traci
         if settings.LEARNING_RATE != t['learning_rate']: raise ValueError('Upstream learning rate changed')
         with StepObserver(control, traci, {'id': job['id'], 'condition_id': 'gym20'}) as observer:
             recorder = TrainingRecorder(observer, settings, out, job['arm'])
-            env = original.environment(q, job, provider, recorder.record); experiment = None; wrapper = None
+            env = context.environment(q, job, provider, recorder.record); experiment = None; wrapper = None
             snapshots = []
             try:
                 base = experiment_type(out/'training_logs')
@@ -171,7 +176,7 @@ def train_job(q, job, out):
                         recorder.begin()
                         super()._run_training_episode()
                         recorder.end(self.frame-1)
-                experiment = RecordedExperiment(preset_factory('cpu', settings.LEARNING_RATE, smoke=p == SMOKE), env, quiet=False)
+                experiment = RecordedExperiment(preset_factory('cpu', settings.LEARNING_RATE, smoke=smoke_run), env, quiet=False)
                 checked = experiment._agent; core = checked.agent
                 wrapper = StreamingReplay(checked, out, recorder); recorder.replay = wrapper
                 initial = {n: smoke.tensor_hash(a.model.state_dict()) for n, a in [('policy', core.policy), ('q', core.q)]}
@@ -227,12 +232,16 @@ def training_metadata(q, root):
     return trained
 
 
-def evaluation_job(q, job, out, root):
+def evaluation_job(q, job, out, root, *, execution=None):
+    context = original if execution is None else execution
+    source = original.SOURCE if execution is None else execution.source
+    upstream = original.UPSTREAM if execution is None else execution.upstream
+    smoke_run = q['protocol'] == SMOKE if execution is None else execution.smoke
     tj = next(j for j in q['train_jobs'] if j['id'] == job['training_id'])
     td = root/'train'/tj['id']; m = verify_episode(td, binding(q, 'train', tj))['metadata']
     n = job['checkpoint_frames']; snap = next(s for s in m['snapshots'] if s['requested_steps'] == n)
     if read(td/f'n{n}.json') != snap: raise ValueError('Checkpoint receipt mismatch')
-    provider, predictor_sha = original.provider_for(q, job['arm'])
+    provider, predictor_sha = context.provider_for(q, job['arm'])
     frozen = None if provider is None else smoke.tensor_hash(provider.model.state_dict())
     metrics = EpisodeMetrics(); trace = []; decisions = []; measurements = []
     def record(event, obs, reward, done, info):
@@ -242,13 +251,13 @@ def evaluation_job(q, job, out, root):
         if event == 'step': decisions.append({'frame': info['execution_audit']['before']})
     identity = {'id': job['id'], 'model_id': 'p7k_'+job['arm'], 'condition_id': 'gym20',
                 'run_seed': job['run_seed'], 'simulator_seed': job['simulator_seed'], 'training_id': job['training_id']}
-    with upstream_session(original.SOURCE, original.UPSTREAM, job['simulator_seed']) as settings:
+    with upstream_session(source, upstream, job['simulator_seed']) as settings:
         import control, traci
         with StepObserver(control, traci, identity) as observer:
-            env = original.environment(q, job, provider, record)
+            env = context.environment(q, job, provider, record)
             try:
                 from all.logging import DummyWriter
-                checked = preset_factory('cpu', settings.LEARNING_RATE, smoke=q['protocol'] == SMOKE)(env, DummyWriter())
+                checked = preset_factory('cpu', settings.LEARNING_RATE, smoke=smoke_run)(env, DummyWriter())
                 contract = checkpoint_contract(env, q['preset'], predictor_sha, q['upstream_config_sha256'])
                 if contract != snap['weights_contract']: raise ValueError('Training/evaluation observation/action mismatch')
                 load_evaluation_weights(checked, td/snap['weights_file'], contract, snap['weights_sha256'])

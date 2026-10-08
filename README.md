@@ -3,6 +3,13 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+The difference ensemble has an explicit strict loader, separate calibration and
+an opt-in matched DDPG bridge. Only new B3 is trained from scratch; sealed P7n
+B0--B3 results stay read-only. See the
+[connection design](docs/design/p06_candidate_difference_connection_v1.md) and
+[manual closed-loop workflow](docs/runbooks/p07_candidate_difference_ddpg_v1.md).
+Passing smoke does not establish method effectiveness.
+
 The opt-in P5 difference-objective branch tests same-root candidate response
 differences without changing the predictor architecture, policy features or
 original control task. Frozen reference data/models are read in place from the
