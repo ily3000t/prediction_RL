@@ -9,12 +9,16 @@ B0--B3 results stay read-only. See the
 [connection design](docs/design/p06_candidate_difference_connection_v1.md) and
 [manual closed-loop workflow](docs/runbooks/p07_candidate_difference_ddpg_v1.md).
 Passing smoke does not establish method effectiveness.
+The 190-test regression subset and bounded one-train/three-evaluation SUMO audit
+pass. The new three-seed 120k request is prepared, not trained; see the
+[connection acceptance](reports/p06_difference_connection_acceptance_20261008.md).
 
 The opt-in P5 difference-objective branch tests same-root candidate response
 differences without changing the predictor architecture, policy features or
 original control task. Frozen reference data/models are read in place from the
-original worktree; new artifacts are isolated. Predictor training is manual and
-new checkpoints are not yet approved for DDPG. See
+original worktree; new artifacts are isolated. Predictor training is manual; its
+original P5 stage did not approve checkpoints for DDPG. The subsequent explicit
+bridge is documented above. See
 [design](docs/design/p05_candidate_difference_v1.md),
 [scope](docs/tasks/p05_candidate_difference_v1.md) and
 [commands](docs/runbooks/p05_candidate_difference_v1.md).

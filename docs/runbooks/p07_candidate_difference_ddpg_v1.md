@@ -47,6 +47,11 @@ python -B tools/train_difference_ddpg.py prepare --calibration-request artifacts
 
 ## 用户手动训练、评价、聚合
 
+2026-10-08 已完成上述有界 smoke 和 prepare，不必重复执行它们。
+正式请求 hash：`e2c86b9f2310b2d9a49a6fe00c5c284a7071102ac153ad484f2b7f9c95e1d372`。
+工程验收见 `reports/p06_difference_connection_acceptance_20261008.md`。
+当前长训练/正式评价尚未启动。
+
 ```powershell
 cd E:\Prediction_RL_worktrees\response-difference-v1
 $differenceRequest = 'artifacts/difference_ddpg/delta_120k_v1/request.json'
