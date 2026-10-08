@@ -3,6 +3,17 @@
 Local reproduction and action-conditioned prediction research based on
 `jlubars/RL-MPC-LaneMerging`.
 
+The opt-in P5 difference-objective branch tests same-root candidate response
+differences without changing the predictor architecture, policy features or
+original control task. Frozen reference data/models are read in place from the
+original worktree; new artifacts are isolated. Predictor training is manual and
+new checkpoints are not yet approved for DDPG. See
+[design](docs/design/p05_candidate_difference_v1.md),
+[scope](docs/tasks/p05_candidate_difference_v1.md) and
+[commands](docs/runbooks/p05_candidate_difference_v1.md).
+The 226-test prediction regression subset passes; see
+[engineering acceptance](reports/p05_candidate_difference_acceptance_20261008.md).
+
 P7n provides the approved one-off 120k matched development experiment, not a
 weights-only continuation or automatic budget extension. All four arms and
 three training seeds start from scratch; frozen predictors and the immutable

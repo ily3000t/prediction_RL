@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "experiment_id": "candidate_response_difference_v1",
+  "review_status": "predictor_training_manual_start_required",
+  "baseline": {
+    "training_request": "artifacts/training/predictor_v1/request.json",
+    "training_report": "artifacts/training/predictor_v1/invocations/648e96637f5e/report.json"
+  },
+  "model": {
+    "schema_version": 1,
+    "neighbor_capacity": 12,
+    "history_steps": 11,
+    "horizon_steps": 25,
+    "tick_s": 0.2,
+    "hidden_dim": 64,
+    "attention_heads": 4,
+    "ensemble_size": 3,
+    "jerk_min": -5,
+    "jerk_max": 5
+  },
+  "training": {
+    "methods": ["conditional"],
+    "member_seeds": [4101, 4102, 4103],
+    "device": "cpu",
+    "torch_threads": 1,
+    "max_epochs": 100,
+    "batch_roots": 16,
+    "shuffle": "paired_seed_epoch_root_permutation",
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "betas": [0.9, 0.999],
+    "epsilon": 1e-8,
+    "weight_decay": 0,
+    "clip_grad_norm": 1,
+    "loss_contract": "root_candidate_response_difference_v1",
+    "difference_lambda": 0.2,
+    "channel_scales": [10, 3, 5, 2],
+    "channel_weights": [1, 1, 1, 1],
+    "selection_metric": "validation_root_equal_scaled_mse",
+    "selection_tie": "earliest_epoch",
+    "early_stop_patience": 15,
+    "early_stop_min_delta": 0.0001,
+    "validation_every_epochs": 1,
+    "warm_start": false,
+    "bootstrap": false
+  },
+  "boundaries": {
+    "execution_contract": "simulation_blocking_exact_v1",
+    "online_feature_layout": "unchanged",
+    "reward_action_policy_network": "unchanged",
+    "data_splits": "reuse_frozen_train_validation_only",
+    "selection_uses_calibration_or_test": false,
+    "ddpg_training_authorized": false,
+    "ordinary_and_absolute_conditional": "reuse_frozen_reference_ensembles"
+  }
+}
