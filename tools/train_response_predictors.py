@@ -21,6 +21,8 @@ from prediction_rl.prediction.interface import PredictorConfig
 from prediction_rl.prediction.model import PredictorEnsemble
 from prediction_rl.prediction.checkpoint import CONTRACT
 from prediction_rl.prediction.epoch_training import MemberTrainer, atomic_torch, VERSION
+from prediction_rl.prediction.candidate_difference import DIFFERENCE_TRAINING_VERSION, DIFFERENCE_LOSS_CONTRACT
+from prediction_rl.prediction.losses import LOSS_CONTRACT
 
 
 def now(): return datetime.now(timezone.utc).isoformat()
@@ -102,7 +104,22 @@ def load_request(path):
     return path.parent,p,r
 
 
+def artifact_identity(p):
+    """Legacy envelope keys/version stay unchanged; difference is opt-in."""
+    version=p.get('version',VERSION)
+    if version==VERSION:
+        if p['training']['loss_contract']!=LOSS_CONTRACT['version']:
+            raise ValueError('Legacy artifact cannot hide a different training objective')
+        return {'version':VERSION}
+    if version==DIFFERENCE_TRAINING_VERSION:
+        if p['training']['loss_contract']!=DIFFERENCE_LOSS_CONTRACT['version']:
+            raise ValueError('Difference artifact requires its explicit loss identity')
+        return {'version':version,'loss_contract':DIFFERENCE_LOSS_CONTRACT}
+    raise ValueError('Unsupported predictor training artifact version')
+
+
 def train_member(directory,p,job,train,val,*,resume):
+    artifact_identity(p)  # refuse mismatched envelope/objective before any update
     cfg=PredictorConfig.from_dict(p['model']); binding={'request_hash':digest(p),'job':job}
     if (directory/'complete.json').exists():
         if not resume: raise ValueError('Use --resume for a completed member')
@@ -131,7 +148,7 @@ def train_member(directory,p,job,train,val,*,resume):
             'best_validation_loss':trainer.selection['best_loss'],'optimizer_steps':trainer.steps,
             'stop_reason':'patience' if trainer.selection['bad_epochs']>=p['training']['early_stop_patience'] else 'epoch_budget'}
     # If interruption happened during final publication, refuse overwrite for diagnosis.
-    atomic_torch(directory/'selected.pt',{'version':VERSION,'purpose':'formal_selected_member','binding':binding,
+    atomic_torch(directory/'selected.pt',{**artifact_identity(p),'purpose':'formal_selected_member','binding':binding,
         'model':p['model'],'contract':CONTRACT,'best_epoch':result['best_epoch'],
         'validation_loss':result['best_validation_loss'],'data_hashes':p['data_hashes'],'state_dict':trainer.best_state})
     write_once(directory/'history.json',trainer.history)
@@ -146,7 +163,7 @@ def export_ensemble(out,p,mode):
         job=next(j for j in p['jobs'] if j['mode']==mode and j['member_seed']==seed)
         directory=out/job['id']; verify_episode(directory,{'request_hash':digest(p),'job':job})
         payload=torch.load(directory/'selected.pt',map_location='cpu',weights_only=True)
-        if (payload['version']!=VERSION or payload['model']!=p['model']
+        if (any(payload.get(k)!=v for k,v in artifact_identity(p).items()) or payload['model']!=p['model']
                 or payload['purpose']!='formal_selected_member' or payload['contract']!=CONTRACT
                 or payload['binding']!={'request_hash':digest(p),'job':job} or payload['data_hashes']!=p['data_hashes']):
             raise ValueError('Selected member lineage mismatch')
@@ -160,7 +177,7 @@ def export_ensemble(out,p,mode):
         selected.append({'seed':seed,'best_epoch':payload['best_epoch'],'validation_loss':payload['validation_loss'],
                          'member_sha256':sha(directory/'selected.pt')})
     path=out/(mode+'_ensemble.pt')
-    envelope={'version':VERSION,'purpose':'formal_validation_selected_ensemble','contract':CONTRACT,
+    envelope={**artifact_identity(p),'purpose':'formal_validation_selected_ensemble','contract':CONTRACT,
               'request_hash':digest(p),'model':p['model'],'mode':mode,'member_seeds':seeds,'selected':selected,
               'data_hashes':p['data_hashes'],'state_dict':model.state_dict(),'calibrated':False,'test_evaluated':False}
     if path.exists():

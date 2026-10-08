@@ -7,6 +7,8 @@ import uuid
 import torch
 
 from .checkpoint import CONTRACT
+from .candidate_difference import (DIFFERENCE_LOSS_CONTRACT, DIFFERENCE_TRAINING_VERSION,
+                                   candidate_difference_objective, checked_lambda)
 from .losses import LOSS_CONTRACT, trajectory_loss
 from .model import ResponsePredictor
 from .supervision import SupervisedBatch
@@ -52,6 +54,26 @@ def evaluate(model, batch, batch_size):
     return total/count
 
 
+def evaluate_difference(model, batch, batch_size, weight):
+    """Component diagnostics; checkpoint selection STILL uses trajectory MSE."""
+    model.eval(); count = 0
+    totals = {k:0. for k in ('trajectory_loss','difference_loss','objective_loss')}
+    coverage = {k:0 for k in ('valid_candidate_pairs','possible_candidate_pairs',
+        'pair_common_actor_time_cells','roots_with_valid_pairs','roots_without_valid_pairs',
+        'difference_root_denominator')}
+    ids = eligible(batch)
+    if not ids: raise ValueError('No validation supervision')
+    with torch.inference_mode():
+        for offset in range(0,len(ids),batch_size):
+            b = subset(batch,ids[offset:offset+batch_size])
+            _, stats = candidate_difference_objective(model(b.observations,b.plans),
+                b.targets,b.target_mask,weight)
+            n = stats['supervised_roots']; count += n
+            for key in totals: totals[key] += stats[key]*n
+            for key in coverage: coverage[key] += stats[key]
+    return {**{k:v/count for k,v in totals.items()},'coverage':coverage}
+
+
 def atomic_torch(path, payload):
     path = Path(path); path.parent.mkdir(parents=True,exist_ok=True)
     temporary = path.parent/(uuid.uuid4().hex[:12]+'.tmp')
@@ -72,9 +94,21 @@ class MemberTrainer:
             raise ValueError('Different dataset manifests')
         if type(seed)is not int or not 0<=seed<2**32 or mode not in ('ordinary','conditional'):
             raise ValueError('Invalid training member')
+        self.difference = training['loss_contract']==DIFFERENCE_LOSS_CONTRACT['version']
+        if self.difference:
+            self.difference_lambda = checked_lambda(training.get('difference_lambda'))
+            if mode!='conditional' or training['selection_metric']!=DIFFERENCE_LOSS_CONTRACT['selection_metric']:
+                raise ValueError('Difference objective requires conditional mode and unchanged MSE selection')
+            self.loss_contract = deepcopy(DIFFERENCE_LOSS_CONTRACT)
+            self.version = DIFFERENCE_TRAINING_VERSION
+        else:
+            if 'difference_lambda' in training:
+                raise ValueError('difference_lambda requires the versioned difference loss contract')
+            self.loss_contract = deepcopy(LOSS_CONTRACT)
+            self.version = VERSION
         if (training['device']!='cpu' or training['torch_threads']!=1 or training['optimizer']!='Adam'
                 or training['warm_start'] or training['bootstrap'] or training['shuffle']!='paired_seed_epoch_root_permutation'
-                or training['loss_contract']!=LOSS_CONTRACT['version']
+                or training['loss_contract']!=self.loss_contract['version']
                 or training['channel_scales']!=LOSS_CONTRACT['channel_scales']
                 or training['channel_weights']!=LOSS_CONTRACT['channel_weights']):
             raise ValueError('Unsupported CPU training contract')
@@ -102,13 +136,23 @@ class MemberTrainer:
         order = torch.randperm(len(self.ids),generator=self.generator).tolist()
         ids = [self.ids[i] for i in order]
         total = 0.; count = 0
+        components = {'trajectory_loss':0.,'difference_loss':0.}
+        coverage = {k:0 for k in ('valid_candidate_pairs','possible_candidate_pairs',
+            'pair_common_actor_time_cells','roots_with_valid_pairs','roots_without_valid_pairs',
+            'difference_root_denominator')}
         self.model.train()
         with torch.random.fork_rng(devices=[]):
             torch.set_rng_state(self.cpu_rng)
             for offset in range(0,len(ids),self.training['batch_roots']):
                 b = subset(self.train,ids[offset:offset+self.training['batch_roots']])
                 self.optimizer.zero_grad(set_to_none=True)
-                loss,stats = trajectory_loss(self.model(b.observations,b.plans),b.targets,b.target_mask)
+                prediction = self.model(b.observations,b.plans)
+                if self.difference:
+                    loss,stats = candidate_difference_objective(prediction,b.targets,b.target_mask,self.difference_lambda)
+                    for key in components: components[key] += stats[key]*stats['supervised_roots']
+                    for key in coverage: coverage[key] += stats[key]
+                else:
+                    loss,stats = trajectory_loss(prediction,b.targets,b.target_mask)
                 loss.backward()
                 if any(p.grad is None or not torch.isfinite(p.grad).all() for p in self.model.parameters()):
                     raise ValueError('Missing/nonfinite model gradient')
@@ -118,7 +162,11 @@ class MemberTrainer:
                     raise ValueError('Nonfinite model update')
                 total += float(loss.detach())*stats['supervised_roots']; count += stats['supervised_roots']
             self.cpu_rng = torch.get_rng_state().clone()
-        validation_loss = evaluate(self.model,self.validation,self.training['batch_roots'])
+        if self.difference:
+            diagnostics = evaluate_difference(self.model,self.validation,self.training['batch_roots'],self.difference_lambda)
+            validation_loss = diagnostics['trajectory_loss']
+        else:
+            validation_loss = evaluate(self.model,self.validation,self.training['batch_roots'])
         self.epoch += 1
         improved = selection_update(self.selection,validation_loss,self.epoch,self.training['early_stop_min_delta'])
         if improved: self.best_state = deepcopy(self.model.state_dict())
@@ -126,12 +174,18 @@ class MemberTrainer:
                'validation_loss':validation_loss,'selected_best':improved,'root_order':ids,
                'excluded_empty_train_roots':len(self.train.root_ids)-len(ids),
                'excluded_empty_validation_roots':len(self.validation.root_ids)-len(eligible(self.validation))}
+        if self.difference:
+            row.update(train_pre_update_trajectory_loss=components['trajectory_loss']/count,
+                train_pre_update_difference_loss=components['difference_loss']/count,
+                validation_difference_loss=diagnostics['difference_loss'],
+                validation_objective_loss=diagnostics['objective_loss'],
+                difference_coverage={'train':coverage,'validation':diagnostics['coverage']})
         self.history.append(row)
         return row
 
     def save(self,path,binding):
-        atomic_torch(path,{'version':VERSION,'purpose':self.purpose,'binding':binding,'config':self.config.to_dict(),
-            'mode':self.mode,'seed':self.seed,'training':self.training,'contract':CONTRACT,'loss_contract':LOSS_CONTRACT,
+        atomic_torch(path,{'version':self.version,'purpose':self.purpose,'binding':binding,'config':self.config.to_dict(),
+            'mode':self.mode,'seed':self.seed,'training':self.training,'contract':CONTRACT,'loss_contract':self.loss_contract,
             'data_hashes':self.data_hashes,'epoch':self.epoch,'steps':self.steps,'history':self.history,
             'selection':self.selection,'model':self.model.state_dict(),'optimizer':self.optimizer.state_dict(),
             'best_model':self.best_state,'sampler_rng':self.generator.get_state(),'cpu_rng':self.cpu_rng})
@@ -140,8 +194,8 @@ class MemberTrainer:
     def load(cls,path,config,mode,seed,training,train,validation,binding,*,purpose='formal'):
         p = torch.load(path,map_location='cpu',weights_only=True)
         trainer = cls(config,mode,seed,training,train,validation,purpose=purpose)
-        expected = {'version':VERSION,'purpose':purpose,'binding':binding,'config':config.to_dict(),
-                    'mode':mode,'seed':seed,'training':training,'contract':CONTRACT,'loss_contract':LOSS_CONTRACT,
+        expected = {'version':trainer.version,'purpose':purpose,'binding':binding,'config':config.to_dict(),
+                    'mode':mode,'seed':seed,'training':training,'contract':CONTRACT,'loss_contract':trainer.loss_contract,
                     'data_hashes':trainer.data_hashes}
         if set(p)!=set(expected)|{'epoch','steps','history','selection','model','optimizer','best_model','sampler_rng','cpu_rng'}:
             raise ValueError('Unsupported checkpoint envelope')
@@ -158,6 +212,16 @@ class MemberTrainer:
             order=[trainer.ids[n] for n in torch.randperm(len(trainer.ids),generator=gen).tolist()]
             if (row['epoch']!=i or row['optimizer_steps']!=i*batches or row['root_order']!=order
                     or not math.isfinite(row['train_pre_update_loss'])): raise ValueError('Corrupt sampler/history')
+            if trainer.difference:
+                for prefix, absolute, delta, combined in (
+                    ('train','train_pre_update_trajectory_loss','train_pre_update_difference_loss','train_pre_update_loss'),
+                    ('validation','validation_loss','validation_difference_loss','validation_objective_loss')):
+                    if (any(not math.isfinite(row[k]) or row[k]<0 for k in (absolute,delta,combined))
+                            or not math.isclose(row[combined],row[absolute]+trainer.difference_lambda*row[delta],rel_tol=2e-6,abs_tol=1e-7)):
+                        raise ValueError('Corrupt difference loss components')
+                    c=row['difference_coverage'][prefix]
+                    if any(type(v)is not int or v<0 for v in c.values()) or c['roots_with_valid_pairs']+c['roots_without_valid_pairs']!=c['difference_root_denominator']:
+                        raise ValueError('Corrupt difference coverage')
             best=selection_update(selection,row['validation_loss'],i,training['early_stop_min_delta'])
             if best!=row['selected_best']: raise ValueError('Corrupt checkpoint selection')
         if selection!=p['selection'] or not torch.equal(gen.get_state(),p['sampler_rng']):
