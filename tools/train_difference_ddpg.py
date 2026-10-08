@@ -21,7 +21,7 @@ import explore_feature_ddpg as original
 import smoke_feature_ddpg as smoke
 from prediction_rl.data.collection_store import read_json as read, file_hash as sha, write_once, run_lock, seal_episode, verify_episode
 from prediction_rl.data.dataset_contract import digest
-from prediction_rl.data.frozen_dataset import inside, verify_historical_inputs
+from prediction_rl.data.frozen_dataset import inside, verify_historical_inputs, verify_historical_text_checkout
 from prediction_rl.evaluation.difference_closed_loop import ARM, PROTOCOL, SMOKE, REFERENCE, validate_protocol, jobs, aggregate
 from prediction_rl.evaluation.fixed_budget_extension import jobs as reference_jobs
 from prediction_rl.evaluation.matched_learning_curve import snapshot_steps
@@ -32,6 +32,16 @@ REFERENCE_HASH = '31301c64cf15606f8fc05a0280b5f7f75fd1c6e33b5cd877087284e59f31be
 REFERENCE_AGGREGATE = 'e2dd769d3943df09db5b2d46991c739cb92604cbbc5277de749e1383b7318c79'
 CONFIG = 'configs/development/p07_candidate_difference_120k_v1.json'
 VERSION = 'candidate_difference_ddpg_request_v1'
+
+
+def checked_upstream_checkout(reference, q):
+    """Accept only Git LF/CRLF spelling, never a reward/configuration change."""
+    relative = original.UPSTREAM.relative_to(ROOT).as_posix()
+    for repo in (reference, ROOT):
+        verify_historical_text_checkout(repo, relative, q['upstream_config_sha256'], q['git_commit'])
+    return {'contract':'historical_git_lf_crlf_only_v1', 'path':relative,
+            'historical_commit':q['git_commit'], 'reference_byte_sha256':q['upstream_config_sha256'],
+            'current_byte_sha256':sha(original.UPSTREAM)}
 
 
 def checked_reference(reference, *, full):
@@ -46,9 +56,9 @@ def checked_reference(reference, *, full):
             or (root/'writer.lock').exists() or q['environment'] != shared.env()
             or q['dependencies'] != smoke.dependencies() or q['runtime_identity'] != original.runtime_identity()
             or q['upstream_hashes'] != original.upstream_hashes()
-            or q['upstream_config_sha256'] != sha(original.UPSTREAM)
             or read(root/'preparation.json')['request_hash'] != REFERENCE_HASH):
         raise ValueError('P7n frozen reference/runtime changed; no fallback or relabeling')
+    checked_upstream_checkout(reference, q)
     if full:
         verify_historical_inputs(reference, {'python_lf:'+k:v for k,v in q['source_hashes'].items()}, q['git_commit'])
     files={str((root/n).relative_to(reference)):sha(root/n) for n in
@@ -138,7 +148,8 @@ def prepare(calibration_request,run_id,*,audit=False,engineering_audit=None):
        'difference_request':p,'predictor':record,'source_hashes':shared.source_hashes(),
        'dependencies':smoke.dependencies(),'environment':shared.env(),
        'runtime_identity':original.runtime_identity(),'upstream_hashes':original.upstream_hashes(),
-       'upstream_config_sha256':sha(original.UPSTREAM),'preset':preset,
+       'upstream_config_sha256':sha(original.UPSTREAM),
+       'upstream_config_provenance':checked_upstream_checkout(reference,previous),'preset':preset,
        'train_jobs':jobs(protocol,'train'),'evaluation_jobs':jobs(protocol,'evaluate'),
        'previous_policy_weights_used_for_training':False,'policy_features_use_bands':False,
        'author50_results_mixed':False,'test_opened':False}
@@ -173,6 +184,8 @@ def load_request(path,expected_hash):
     reference=Path(q['reference_root']).resolve()
     for name,h in q['reference_files'].items():
         if sha(inside(reference,name)) != h: raise ValueError('Frozen reference evidence changed')
+    if q['upstream_config_provenance'] != checked_upstream_checkout(reference,read(inside(reference,REFERENCE_REQUEST))):
+        raise ValueError('Historical upstream checkout provenance changed')
     cp=read(inside(ROOT,q['calibration_request']))
     if q['predictor'] != cp['checkpoint'] or q['difference_request'] != read(inside(ROOT,cp['training_request'])):
         raise ValueError('Predictor/calibration request mismatch')

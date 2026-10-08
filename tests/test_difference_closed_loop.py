@@ -98,3 +98,38 @@ def test_kernel_extension_is_explicit_optional():
     import inspect
     assert inspect.signature(cli.kernel.train_job).parameters['execution'].default is None
     assert inspect.signature(cli.kernel.evaluation_job).parameters['execution'].default is None
+
+
+def checkout_fixture(tmp_path,monkeypatch):
+    import hashlib
+    import prediction_rl.data.frozen_dataset as frozen
+    reference=tmp_path/'reference'; current=tmp_path/'current'
+    relative='upstream/config.json'; blob=b'{"reward": -10, "jerk_max": 5}\n'
+    for repo,data in ((reference,blob),(current,blob.replace(b'\n',b'\r\n'))):
+        path=repo/relative; path.parent.mkdir(parents=True); path.write_bytes(data)
+    monkeypatch.setattr(cli,'ROOT',current)
+    monkeypatch.setattr(cli.original,'UPSTREAM',current/relative)
+    monkeypatch.setattr(frozen.subprocess,'check_output',lambda *a,**k:blob)
+    q={'git_commit':'1'*40,'upstream_config_sha256':hashlib.sha256(blob).hexdigest()}
+    return reference,current,relative,q
+
+
+def test_readonly_reuse_binds_both_checkout_spellings(tmp_path,monkeypatch):
+    reference,current,relative,q=checkout_fixture(tmp_path,monkeypatch)
+    before=(reference/relative).read_bytes()
+    p=cli.checked_upstream_checkout(reference,q)
+    assert p['reference_byte_sha256'] != p['current_byte_sha256']
+    assert p['current_byte_sha256']==cli.sha(current/relative)
+    assert p['contract']=='historical_git_lf_crlf_only_v1'
+    assert (reference/relative).read_bytes()==before
+
+
+@pytest.mark.parametrize('fault',['reference_reward','current_reward','whitespace','recorded_hash','commit'])
+def test_checkout_reuse_rejects_changes_beyond_line_endings(tmp_path,monkeypatch,fault):
+    reference,current,relative,q=checkout_fixture(tmp_path,monkeypatch)
+    if fault=='reference_reward': (reference/relative).write_bytes(b'{"reward": -11, "jerk_max": 5}\n')
+    elif fault=='current_reward': (current/relative).write_bytes(b'{"reward": -11, "jerk_max": 5}\n')
+    elif fault=='whitespace': (current/relative).write_bytes(b'{"reward":-10,"jerk_max":5}\n')
+    elif fault=='recorded_hash': q['upstream_config_sha256']='f'*64
+    else: q['git_commit']='untrusted'
+    with pytest.raises(ValueError): cli.checked_upstream_checkout(reference,q)
