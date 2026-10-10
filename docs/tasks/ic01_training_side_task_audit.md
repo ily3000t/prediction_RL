@@ -43,10 +43,10 @@
 
 ## 产物位置
 
-- 源码：新增在本工作树的 `src/prediction_rl/` 独立课程分析子模块，具体名称待实施。
-- 运行配置：`configs/development/` 新版本，无多层继承，不静默忽略未知字段。
+- 源码：`src/prediction_rl/curriculum/interaction.py` 与 `train_reader.py`；入口 `tools/audit_curriculum_interaction.py`，未接入训练路径。
+- 运行配置：`configs/development/ic01_train_interaction_v1.json`，无多层继承，不静默忽略未知字段。
 - 原始离线分析及摘要：本工作树 `artifacts/ic/<short-run-id>`，Git 忽略。
-- 小型验收说明：`reports/`，只保存工程结论，不提交轨迹或权重。
+- 小型验收说明：`reports/ic01_training_interaction_acceptance.md`，只保存工程结论与汇总，不提交轨迹或权重。
 
 ## Git 提交要求
 
@@ -58,4 +58,6 @@
 
 ## 交接命令
 
-本阶段 CLI 尚未实现。本次不要运行旧的 120k 训练入口来代替课程实验。完成 IC01 后交付实际分析命令及报告，再进入 IC02 的任务入口确认。
+本阶段已运行完成，报告在 `artifacts/ic/ic01_v1/report.json`；该 run ID 不可覆盖。实际分析命令与测试步骤见 `docs/runbooks/ic01_interaction_audit.md`。
+
+当前工程审计通过，三层任务池未通过：C0=0、C1=211、C2=502，所有 root 均不可直接作为原 reset 任务。暂停课程训练，保留负结果，不改阈值补层。下一步需要确认 IC02 的任务入口及覆盖方案；不要运行旧 120k 训练入口来代替课程实验。

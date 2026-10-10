@@ -25,6 +25,8 @@ E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B -m pytest -q -p no:cacheprov
 
 ## 分析（工作树必须干净）
 
+以下是已完成 `ic01_v1` 的实际调用。不要再次使用相同 run ID；仅在明确需要重新审计时选择新的短 run ID，旧结果保留。
+
 ```powershell
 E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/audit_curriculum_interaction.py --baseline-root E:\Prediction_RL --run-id ic01_v1
 ```
@@ -42,3 +44,34 @@ E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/audit_curriculum_inter
 - `report.json`：所有源场景完整汇总，工程 gate 与训练许可分开。层退化或响应不足也是正常完成的结果。
 
 先检查 C1 响应是否真实、C0/C1 是否足够及支持缺口，再进入 IC02。无论本次数据结果如何，`training_ready` 都保持 false，直到任务入口与完整任务分布已冻结并经用户确认。
+
+## 已完成的 IC01 验收
+
+- 分析源码提交：`9dc84f556a14a596884d3722fcf325dfde32dec2`。
+- 256 个 train episode、713 个已到达 root，另有 55 个参考前缀未到达的 root，单独保留原因。
+- C0/C1/C2 = 0/211/502；工程 gate 为 true，但训练许可为 false。
+- 485 个 root 有正邻车响应；重复分支逐字节一致，观测噪声下限为零。未运行新仿真或预测器推理。
+- 105 项单元及既有 actor/标签/采集回归测试通过。
+- 下一步先确认任务入口与覆盖，不放宽边界补出 C0、不启动 DDPG。
+
+完整验收及限制见 `reports/ic01_training_interaction_acceptance.md`。C1 的 root 数量不能直接用作任务数量，root 的层比例不能用作原目标任务分布 pi。
+
+下面的只读检查可复核 C0 的两个独立缺口，不会重新计算阈值或覆盖报告：
+
+```powershell
+$icRows = @(Get-Content -LiteralPath artifacts/ic/ic01_v1/roots.json -Raw | ConvertFrom-Json)
+$icReport = Get-Content -LiteralPath artifacts/ic/ic01_v1/report.json -Raw | ConvertFrom-Json
+$icBound = $icReport.summary.classification.thresholds
+[pscustomobject]@{
+    long_distance_and_low_closing = @($icRows | Where-Object {
+        $_.root_context.difficulty.remaining_merge_distance_m -ge $icBound.remaining_merge_distance_m -and
+        $null -ne $_.root_context.difficulty.maximum_closing_mps -and
+        $_.root_context.difficulty.maximum_closing_mps -le $icBound.maximum_closing_mps
+    }).Count
+    low_response_and_full_horizon = @($icRows | Where-Object {
+        $null -ne $_.I -and $_.I -le $icBound.I_low -and $_.interaction.full_common_horizon
+    }).Count
+}
+```
+
+两项实际输出均为零；这说明问题不只是单个门槛略微偏严，而是现有 root 采集位置、状态关联与支持窗口不能直接构成所提议的基础任务层。
