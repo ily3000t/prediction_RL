@@ -107,4 +107,4 @@ engineering_validity, unavailable_checkpoints
 
 本工作树没有自动继承忽略的 `st_cy.cp310-win_amd64.pyd`；原基线有该扩展。原 `st.py` 在 `USE_CYTHON` 时导入它，不能悄悄关闭该设置或从旧目录导入模块来“跑通”。批准 IC02b 后，需要在新工作树按已固定来源构建兼容扩展或明确验收同来源本地构建资产，记录依赖与哈希，原基线不动。
 
-当前：IC02a 离线核查完成；IC02b 实际 12 回合/144 控制步的封存结果经过独立零仿真复核，12 项精确比较通过。原 `failure.json` 和缺失的最终 postflight 如实保留，本次预算不能重跑或更名续跑。C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。入口 prototype 是 single-task，不宣称已集成或验证持久 learner/replay；下一步先设计 task 参考刻画方案及有限预算，不自动开始新采集。
+当前：IC02a 离线核查完成；IC02b 实际 12 回合/144 控制步的封存结果经过独立零仿真复核，12 项精确比较通过。原 `failure.json` 和缺失的最终 postflight 如实保留，本次预算不能重跑或更名续跑。C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。入口 prototype 是 single-task，不宣称已集成或验证持久 learner/replay。IC02c 已完成 task 参考刻画的纯离线设计与实际审计，见 `reports/ic02c_task_design_acceptance.md`；下一步需要批准三任务 collector 工程范围及完整预算，不自动开始新采集。

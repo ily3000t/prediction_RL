@@ -44,7 +44,10 @@ IC02b 只有用户明确批准命名协议与 finite smoke 后才允许实现独
 - IC02b 原型：`src/prediction_rl/envs/fresh_task.py`；冻结预算/比较：`curriculum/entry_smoke.py`；CLI：`tools/smoke_curriculum_entry.py`。
 - IC02b 批准范围：`provenance/ic02b_smoke_authorization.json`；新配置与 runbook 分别是 `configs/development/ic02b_entry_smoke_v1.json`、`docs/runbooks/ic02b_entry_smoke.md`。实际 12 回合/144 控制步已执行；原聚合失败保留，独立离线复核确认 12 项封存轨迹精确一致，不能补造原最终内存 postflight。
 - IC02b 复核 CLI：`tools/review_curriculum_entry.py`；验收：`reports/ic02b_entry_parity_acceptance.md`；原运行 `artifacts/ic/ic02b_v1/` 与独立复核 `artifacts/ic/ic02b_review_v1/` 都不可覆盖。
+- IC02c 已完成离线任务设计：`tools/audit_curriculum_task_design.py`、`docs/tasks/ic02c_task_characterization.md` 与 `reports/ic02c_task_design_acceptance.md`。实际报告 `artifacts/ic/ic02c_design_v1/report.json` 只保存既存证据与未授权提案；0 新会话/分支/训练。
 
 ## Git、暂停条件与交接
 
 在当前 codex/ 分支原子提交，不合并 main、不推送、不打 runtime milestone tag。新入口的封存轨迹 parity 已通过，但完整原 postflight 未恢复；任务层退化与 target pi 未定义，仍不启动课程训练。具体已实现入口和离线复核 CLI 见 IC02b runbook；原 12 回合预算已消耗，不得重跑，新增 live 数据必须另获批准。
+
+IC02c 的下一批准点是三任务独立参考刻画 collector：11000/11008/11016，最多 114 个新 SUMO 会话、12,234 控制步、23,862 raw tick，0 predictor/DDPG 训练。完整 32-task 覆盖 pilot 在工程验收后另获批准；不能由离线设计的 gate 推断运行授权。
