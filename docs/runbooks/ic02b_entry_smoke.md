@@ -26,9 +26,9 @@ E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B -m pytest -q -p no:cacheprov
 
 受限临时目录环境中，另传一个新的、经过绝对路径校验的 `--basetemp` leaf，不对现有结果目录使用它。离线测试覆盖入口、既有特征及 terminal 回归；实际数量记录在验收报告，正式执行前必须审查并提交源码/配置。
 
-## 有界执行
+## 有界执行（本次预算已消耗，以下保留为历史命令）
 
-从 `E:\Prediction_RL_worktrees_course_learning` 的干净研究分支执行；以下 CLI 已实现，但命令存在不表示 smoke 已完成。
+IC02b 的 12 个工程回合/144 控制步已执行，原进程在最终聚合失败，保存于 `artifacts/ic/ic02b_v1/failure.json`。不得再次运行或通过更换 run ID 增加本次预算。以下已实现命令保留用于溯源，不是当前下一步命令。
 
 ```powershell
 E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/smoke_curriculum_entry.py prepare --baseline-root E:\Prediction_RL --run-id ic02b_v1
@@ -51,5 +51,19 @@ E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/smoke_curriculum_entry
 `report.json` 需要全部 12 格、重复与跨路径精确一致性、父进程 RNG 不变、冻结权重和合法真实 tick/feature 调用计数。仅 latency 与 PID 排除于语义比较；不放宽数值阈值。终止/cleanup 的传输另有离线 fixture，短 live smoke 不声称实际覆盖全部自然终止类别。
 
 失败保存 `failure.json`，不改 seed/标准；不自动重跑失败或不完整 episode。`--resume` 仅复用同源码请求下已经完整校验的回合，不补跑已经开始但未完成的回合。成功/失败顶层报告都不可覆盖；不得用换 run ID 绕过本次批准总预算。
+
+## 聚合修复与纯离线复核
+
+原 direct 路径从 JSON 读取设置，worker-entry 路径在内存保留整数键。`runtime.settings.JERK_VALUES_DQN` 的整数键写入 JSON 后变为字符串键，导致混合表示的精确比较失败。修复仅让新鲜/复用回合统一读取通过完整 receipt 和字节哈希校验的 `trace.json`；比较函数、排除字段及数值标准不改。
+
+`tools/review_curriculum_entry.py` 是独立的封存产物复核入口，不调用 simulator、预测器推理或 learner。先提交测试过的修复，再在干净课程分支运行：
+
+```powershell
+E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/review_curriculum_entry.py --request artifacts/ic/ic02b_v1/request.json --confirm-request-hash 7bf5fd155c48bc28b34adfff916a6bb074e3a1870b334a08be32f19784fd7a41 --run-id ic02b_review_v1
+```
+
+它验证原 request/preparation/approval、来源 commit、历史 runner Git blob、未变的环境/特征/比较源码、全部模型文件字节及 12 份 seal/inventory，再用未修改的精确比较重聚合。新报告位于 `artifacts/ic/ic02b_review_v1/report.json`；原失败报告及各回合文件不写入、不覆盖。复核失败也保存自己的新 failure，不自动重试。
+
+原进程未执行到最终内存 tensor/global-RNG postflight；离线复核不能补造这些证据。报告区分 `artifact_parity_gate`、逐回合 RNG witness、文件权重哈希与缺失的原进程 postflight；不把原 `engineering_gate=false` 改成 true，不宣称完整原验收已恢复。已有短 live 轨迹没有自然终止，终止传输只以离线 fixture 作为当前证据。
 
 通过入口验证后仍需单独设计 task-level D/I 参考刻画、三层覆盖、目标 pi 与数据预算，并经用户批准。当前不提供也不运行课程 DDPG 命令；不合并 main、不推送、不创建可运行课程标签。

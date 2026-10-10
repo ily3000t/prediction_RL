@@ -35,6 +35,15 @@ def read(path):
     return strict_json(Path(path).read_bytes())
 
 
+def read_sealed_trace(directory, binding):
+    """Compare persisted evidence, never a mixture of JSON and live objects."""
+    receipt = verify_episode(directory, binding)
+    raw = (Path(directory)/'trace.json').read_bytes()
+    if hashlib.sha256(raw).hexdigest() != receipt['files'].get('trace.json'):
+        raise ValueError('Sealed trace bytes changed before aggregation')
+    return strict_json(raw), receipt['metadata']
+
+
 def runtime():
     binary = shutil.which('sumo.exe') or shutil.which('sumo')
     if binary is None:
@@ -280,8 +289,6 @@ def execute(path, expected_hash, resume=False):
                 if directory.exists():
                     if not resume:
                         raise FileExistsError('Existing episode cannot be overwritten')
-                    row = verify_episode(directory, binding)['metadata']
-                    trace = read(directory/'trace.json')
                 else:
                     directory.mkdir()
                     write_once(directory/'started.json', {'job': job, 'request_hash': expected_hash,
@@ -304,6 +311,9 @@ def execute(path, expected_hash, resume=False):
                         raise ValueError('Task entry/feature calls mutated persistent parent RNG')
                     write_once(directory/'trace.json', trace)
                     seal_episode(directory, binding, row)
+                # JSON converts numeric settings keys to strings. Both fresh and
+                # resumed jobs must use the same verified on-disk representation.
+                trace, row = read_sealed_trace(directory, binding)
                 validate_trace(trace, job, geometry)
                 traces[job['id']] = trace
                 report['rows'].append(row)
