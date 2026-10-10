@@ -1,0 +1,21 @@
+{
+  "version": "ic02d-human-authorization-v1",
+  "recorded_on": "2026-10-11",
+  "authorization_source": "User replied 好的继续 after the explicit question approving collector implementation and three-task engineering verification, at most 114 SUMO sessions, 12234 control steps and 90 candidate branches; no predictor/DDPG training.",
+  "protocol_id": "ic02d-task-engineering-v1",
+  "run_id": "ic02d_eng_v1",
+  "simulator_seeds": [11000, 11008, 11016],
+  "maximum_tasks": 3,
+  "maximum_fresh_sumo_sessions": 114,
+  "maximum_control_steps": 12234,
+  "maximum_candidate_branches": 90,
+  "maximum_raw_ticks": 23862,
+  "predictor_inference_authorized": false,
+  "predictor_training_authorized": false,
+  "ddpg_training_authorized": false,
+  "remaining_29_pilot_tasks_authorized": false,
+  "task_layer_assignment_authorized": false,
+  "merge_main_authorized": false,
+  "push_authorized": false,
+  "old_baseline_access": "read_only"
+}
