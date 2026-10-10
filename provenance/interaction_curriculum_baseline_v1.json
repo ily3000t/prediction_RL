@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "purpose": "local_read_only_baseline_references_not_training_configuration",
+  "recorded_on": "2026-10-10",
+  "baseline_repository": "E:/Prediction_RL",
+  "baseline_branch": "main",
+  "baseline_commit": "75051acc06f6ea2ab6dda9be678f191b63d04569",
+  "baseline_clean_when_pinned": true,
+  "worktree": "E:/Prediction_RL_worktrees_course_learning",
+  "research_branch": "codex/interaction-curriculum-v1",
+  "status": "design_only",
+  "training_ready": false,
+  "reference_access": "read_only_no_writable_links_no_baseline_output_writes",
+  "new_output_root": "artifacts/ic",
+  "hash_contract": "sha256_of_actual_file_bytes_not_canonical_request_digest",
+  "references": [
+    {
+      "role": "ordinary_predictor_frozen_three_member_ensemble",
+      "relative_path": "artifacts/training/predictor_v1/ordinary_ensemble.pt",
+      "sha256": "939242f358315bd00ce89978422e4b55b8059f41837463d2e80f661c63817e8d",
+      "use": "inference_only"
+    },
+    {
+      "role": "conditional_predictor_frozen_three_member_ensemble",
+      "relative_path": "artifacts/training/predictor_v1/conditional_ensemble.pt",
+      "sha256": "daddeda8569b88c2a3482a0e8c739995785ee0f8216dda6525c86d2ce120e25f",
+      "use": "inference_only"
+    },
+    {
+      "role": "historical_120k_matched_request",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/request.json",
+      "sha256": "1936cc4b7b7c1c7bc661751a33cc0cce0e1f3a414954a4fa9f34a85d0d19d633",
+      "use": "provenance_only_not_a_curriculum_run_request"
+    },
+    {
+      "role": "historical_120k_matched_aggregate",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/aggregate.json",
+      "sha256": "e2dd769d3943df09db5b2d46991c739cb92604cbbc5277de749e1383b7318c79",
+      "use": "historical_context_not_matched_mix_control"
+    },
+    {
+      "role": "predictor_dataset_review",
+      "relative_path": "artifacts/data_reviews/response_v1_review/review.json",
+      "sha256": "0f59c02cb6daa075e65ab0c7461ca5ff5ca1bfb7f13af9d41ef85ae57632d312",
+      "use": "train_split_metadata_only_for_stratification_test_remains_locked"
+    },
+    {
+      "role": "historical_b2_policy_seed_0",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/ordinary_s0/n120000.pt",
+      "sha256": "56e8c5deef8e5dff661164c435fb3d8605baefbf22d75149c1538d3ea4e642a2",
+      "use": "historical_reference_never_training_initialization"
+    },
+    {
+      "role": "historical_b2_policy_seed_1",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/ordinary_s1/n120000.pt",
+      "sha256": "2db9b40060a1e78f918efd8d3efe72a72903a17a1d901c5c70a5243524d2a684",
+      "use": "historical_reference_never_training_initialization"
+    },
+    {
+      "role": "historical_b2_policy_seed_2",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/ordinary_s2/n120000.pt",
+      "sha256": "5f3a52d5832833efe242cd81a23c8e88414ca2db9f1002c8a212aaf5d42fcc93",
+      "use": "historical_reference_never_training_initialization"
+    },
+    {
+      "role": "historical_b3_policy_seed_0",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/conditional_s0/n120000.pt",
+      "sha256": "df4579f11b6ce3a02a083293452f2d13fc93a01f08a0ff988d892c402f842dd2",
+      "use": "historical_reference_never_training_initialization"
+    },
+    {
+      "role": "historical_b3_policy_seed_1",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/conditional_s1/n120000.pt",
+      "sha256": "aae6e45ca6be2ec2d4f0f5a23164b3c12355f74d4deee8c496e1f5d7198300bd",
+      "use": "historical_reference_never_training_initialization"
+    },
+    {
+      "role": "historical_b3_policy_seed_2",
+      "relative_path": "artifacts/p7n/p7n_120k_v1/train/conditional_s2/n120000.pt",
+      "sha256": "5e9ff175b2be6851664921588cf9ab8c70ecac7604545d31b2ec492baff5dd1c",
+      "use": "historical_reference_never_training_initialization"
+    }
+  ],
+  "unresolved_before_training": [
+    "train_only_neighbor_response_measurement_and_repeat_noise_floor",
+    "root_to_executable_episode_task_mapping",
+    "legal_task_entry_and_reset_protocol",
+    "original_target_distribution_definition_and_weights",
+    "task_pool_thresholds_coverage_and_manifest_freeze",
+    "bounded_smoke_and_user_approval"
+  ],
+  "full_training_started": false,
+  "sumo_smoke_run_in_this_change": false,
+  "test_data_opened": false,
+  "baseline_artifacts_copied": false
+}
