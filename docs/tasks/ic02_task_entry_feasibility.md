@@ -41,7 +41,9 @@ IC02b 只有用户明确批准命名协议与 finite smoke 后才允许实现独
 - 输出：本工作树 `artifacts/ic/<short-run-id>`，不覆盖。
 - 设计与运行说明：`docs/design/curriculum_task_entry_v1.md`、`docs/runbooks/ic02a_entry_design.md`。
 - 小型验收：`reports/`；原始运行日志、轨迹、权重、编译扩展不提交 Git。
+- IC02b 原型：`src/prediction_rl/envs/fresh_task.py`；冻结预算/比较：`curriculum/entry_smoke.py`；CLI：`tools/smoke_curriculum_entry.py`。
+- IC02b 批准范围：`provenance/ic02b_smoke_authorization.json`；新配置与 runbook 分别是 `configs/development/ic02b_entry_smoke_v1.json`、`docs/runbooks/ic02b_entry_smoke.md`。实际 runtime 结果尚待运行验收。
 
 ## Git、暂停条件与交接
 
-在当前 codex/ 分支原子提交，不合并 main、不推送、不打 runtime milestone tag。未取得新入口批准、缺本地构建、入口不对齐、任务层退化或 target pi 未定义时，不启动课程训练。具体已实现命令见 runbook；拟新增 worker-entry 或 smoke 尚无可执行 CLI，不能描述为已运行。
+在当前 codex/ 分支原子提交，不合并 main、不推送、不打 runtime milestone tag。新入口和有限 smoke 已获用户批准；缺本地构建、入口不对齐、任务层退化或 target pi 未定义时，仍不启动课程训练。具体已实现入口 CLI 见 IC02b runbook；实现或批准不等于 runtime 已通过。

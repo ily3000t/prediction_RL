@@ -1,10 +1,10 @@
-# IC02：课程任务入口设计（未批准运行）
+# IC02：课程任务入口设计（IC02b 有限原型已批准）
 
 ## 1. 决策摘要
 
 推荐候选协议 **`seeded_fresh_gym20_task_v1`**：每个 task 用显式的训练侧 seed 启动全新 SUMO，调用原 Gym reset，等待原 20 秒，在原位置插入 ego，DDPG 从第一个原始 observation 开始控制。环境随机数只在独立 worker 中播种；父进程中的策略、优化器、replay、探索噪声和课程 RNG 持续存在。
 
-**当前只有静态核查及设计，不存在新入口实现或运行许可。** 用户的继续指令允许 IC02a 离线设计，不自动批准改变训练 reset、执行 SUMO 或训练。IC02b 的明确入口和有限 smoke 需确认后才能实施。
+IC02a 已完成静态核查，其不可覆盖报告与旧 proposal 配置保持原样。随后用户在明确的 IC02b 入口和 12 回合/144 控制步问题后回复“继续”，批准原型与有限 smoke；来源记录在 `provenance/ic02b_smoke_authorization.json`。新入口实现位于 `envs/fresh_task.py`，运行规范见 `docs/runbooks/ic02b_entry_smoke.md`。**批准并不表示已经通过 runtime 验收，更不批准课程训练或新任务采集。**
 
 这一入口不自动解决 C0=0。IC01 证实旧近合流 root 分布不适合原三层交集规则；入口一致性与任务层覆盖是两个不同的 gate。没有覆盖与任务分层证据前，不提供课程训练请求。
 
@@ -90,9 +90,9 @@ engineering_validity, unavailable_checkpoints
 
 旧 B3 只作历史参照；B2-Mix/B2-Curriculum/B3-Mix/B3-Curriculum 全部使用同一批准入口、任务池和预算，从头训练。新的共同入口改变了与旧 B3 的可比范围，不改变四组内部的共同控制条件。
 
-## 7. IC02b 有限 smoke 提案（需批准）
+## 7. IC02b 有限 smoke（范围已批准，结果待验收）
 
-冻结提案在 `configs/development/ic02a_entry_design_v1.json`，不是可执行请求：
+旧静态提案 `configs/development/ic02a_entry_design_v1.json` 保持不可执行。新批准范围单独冻结为 `configs/development/ic02b_entry_smoke_v1.json`，不会把旧提案的 authorized 字段直接改为 true：
 
 - train seeds 11000/11001/11002，原配置，非开发评价 seeds。
 - 原 direct 与拟新增 worker-entry 两条路径，各重复 2 次：最多 12 个工程 episode。
@@ -107,4 +107,4 @@ engineering_validity, unavailable_checkpoints
 
 本工作树没有自动继承忽略的 `st_cy.cp310-win_amd64.pyd`；原基线有该扩展。原 `st.py` 在 `USE_CYTHON` 时导入它，不能悄悄关闭该设置或从旧目录导入模块来“跑通”。批准 IC02b 后，需要在新工作树按已固定来源构建兼容扩展或明确验收同来源本地构建资产，记录依赖与哈希，原基线不动。
 
-当前：IC02a 源码/映射核查可以纯离线执行；IC02b 新入口及 smoke 未批准、未实现、未执行；C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。下一项人工决定是：是否批准上述新入口原型及有界 smoke，而非是否开始完整课程实验。
+当前：IC02a 离线核查完成；IC02b 原型和有限 smoke 范围已批准，代码及离线测试已实现，实际 SUMO 结果待验收。C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。入口 prototype 是 single-task，不宣称已集成或验证持久 learner/replay；验证通过后再决定后续 task 参考刻画方案及预算。

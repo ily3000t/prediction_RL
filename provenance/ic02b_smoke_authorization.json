@@ -1,0 +1,19 @@
+{
+  "version": "ic02b-human-authorization-v1",
+  "recorded_on": "2026-10-10",
+  "authorization_source": "User replied 继续 after an explicit question naming IC02b, seeded_fresh_gym20_task_v1, 12 engineering episodes and 144 control steps without DDPG training.",
+  "research_branch": "codex/interaction-curriculum-v1",
+  "entry_contract": "seeded_fresh_gym20_task_v1",
+  "scope": "new_entry_prototype_local_extension_build_and_bounded_parity_smoke",
+  "maximum_episodes": 12,
+  "maximum_control_steps": 144,
+  "maximum_waiting_insertion_ticks": 1212,
+  "maximum_feature_calls_per_mode": 156,
+  "new_counterfactual_branches": 0,
+  "optimizer_updates": 0,
+  "training_authorized": false,
+  "task_layer_assignment_authorized": false,
+  "merge_main_authorized": false,
+  "push_authorized": false,
+  "old_baseline_access": "read_only"
+}
