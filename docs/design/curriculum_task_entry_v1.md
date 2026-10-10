@@ -4,7 +4,7 @@
 
 推荐候选协议 **`seeded_fresh_gym20_task_v1`**：每个 task 用显式的训练侧 seed 启动全新 SUMO，调用原 Gym reset，等待原 20 秒，在原位置插入 ego，DDPG 从第一个原始 observation 开始控制。环境随机数只在独立 worker 中播种；父进程中的策略、优化器、replay、探索噪声和课程 RNG 持续存在。
 
-IC02a 已完成静态核查，其不可覆盖报告与旧 proposal 配置保持原样。随后用户在明确的 IC02b 入口和 12 回合/144 控制步问题后回复“继续”，批准原型与有限 smoke；来源记录在 `provenance/ic02b_smoke_authorization.json`。新入口实现位于 `envs/fresh_task.py`，运行规范见 `docs/runbooks/ic02b_entry_smoke.md`。**批准并不表示已经通过 runtime 验收，更不批准课程训练或新任务采集。**
+IC02a 已完成静态核查，其不可覆盖报告与旧 proposal 配置保持原样。随后用户在明确的 IC02b 入口和 12 回合/144 控制步问题后回复“继续”，批准原型与有限 smoke；来源记录在 `provenance/ic02b_smoke_authorization.json`。新入口实现位于 `envs/fresh_task.py`，运行规范见 `docs/runbooks/ic02b_entry_smoke.md`。该预算现已执行；12 项封存轨迹 parity 精确通过，但原进程在 JSON 键表示聚合错误后退出，未采集最终内存 tensor/RNG postflight。原失败保留，独立离线报告不冒充完整成功；详见 `reports/ic02b_entry_parity_acceptance.md`。**这不批准课程训练或新任务采集。**
 
 这一入口不自动解决 C0=0。IC01 证实旧近合流 root 分布不适合原三层交集规则；入口一致性与任务层覆盖是两个不同的 gate。没有覆盖与任务分层证据前，不提供课程训练请求。
 
@@ -90,7 +90,7 @@ engineering_validity, unavailable_checkpoints
 
 旧 B3 只作历史参照；B2-Mix/B2-Curriculum/B3-Mix/B3-Curriculum 全部使用同一批准入口、任务池和预算，从头训练。新的共同入口改变了与旧 B3 的可比范围，不改变四组内部的共同控制条件。
 
-## 7. IC02b 有限 smoke（范围已批准，结果待验收）
+## 7. IC02b 有限 smoke（已执行，封存 parity 通过，完整 postflight 缺失）
 
 旧静态提案 `configs/development/ic02a_entry_design_v1.json` 保持不可执行。新批准范围单独冻结为 `configs/development/ic02b_entry_smoke_v1.json`，不会把旧提案的 authorized 字段直接改为 true：
 
@@ -107,4 +107,4 @@ engineering_validity, unavailable_checkpoints
 
 本工作树没有自动继承忽略的 `st_cy.cp310-win_amd64.pyd`；原基线有该扩展。原 `st.py` 在 `USE_CYTHON` 时导入它，不能悄悄关闭该设置或从旧目录导入模块来“跑通”。批准 IC02b 后，需要在新工作树按已固定来源构建兼容扩展或明确验收同来源本地构建资产，记录依赖与哈希，原基线不动。
 
-当前：IC02a 离线核查完成；IC02b 原型和有限 smoke 范围已批准，代码及离线测试已实现，实际 SUMO 结果待验收。C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。入口 prototype 是 single-task，不宣称已集成或验证持久 learner/replay；验证通过后再决定后续 task 参考刻画方案及预算。
+当前：IC02a 离线核查完成；IC02b 实际 12 回合/144 控制步的封存结果经过独立零仿真复核，12 项精确比较通过。原 `failure.json` 和缺失的最终 postflight 如实保留，本次预算不能重跑或更名续跑。C0/C1/C2 task 定义、target pi、课程调度与训练仍未通过。入口 prototype 是 single-task，不宣称已集成或验证持久 learner/replay；下一步先设计 task 参考刻画方案及有限预算，不自动开始新采集。

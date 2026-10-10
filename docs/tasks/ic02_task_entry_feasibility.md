@@ -42,8 +42,9 @@ IC02b 只有用户明确批准命名协议与 finite smoke 后才允许实现独
 - 设计与运行说明：`docs/design/curriculum_task_entry_v1.md`、`docs/runbooks/ic02a_entry_design.md`。
 - 小型验收：`reports/`；原始运行日志、轨迹、权重、编译扩展不提交 Git。
 - IC02b 原型：`src/prediction_rl/envs/fresh_task.py`；冻结预算/比较：`curriculum/entry_smoke.py`；CLI：`tools/smoke_curriculum_entry.py`。
-- IC02b 批准范围：`provenance/ic02b_smoke_authorization.json`；新配置与 runbook 分别是 `configs/development/ic02b_entry_smoke_v1.json`、`docs/runbooks/ic02b_entry_smoke.md`。实际 runtime 结果尚待运行验收。
+- IC02b 批准范围：`provenance/ic02b_smoke_authorization.json`；新配置与 runbook 分别是 `configs/development/ic02b_entry_smoke_v1.json`、`docs/runbooks/ic02b_entry_smoke.md`。实际 12 回合/144 控制步已执行；原聚合失败保留，独立离线复核确认 12 项封存轨迹精确一致，不能补造原最终内存 postflight。
+- IC02b 复核 CLI：`tools/review_curriculum_entry.py`；验收：`reports/ic02b_entry_parity_acceptance.md`；原运行 `artifacts/ic/ic02b_v1/` 与独立复核 `artifacts/ic/ic02b_review_v1/` 都不可覆盖。
 
 ## Git、暂停条件与交接
 
-在当前 codex/ 分支原子提交，不合并 main、不推送、不打 runtime milestone tag。新入口和有限 smoke 已获用户批准；缺本地构建、入口不对齐、任务层退化或 target pi 未定义时，仍不启动课程训练。具体已实现入口 CLI 见 IC02b runbook；实现或批准不等于 runtime 已通过。
+在当前 codex/ 分支原子提交，不合并 main、不推送、不打 runtime milestone tag。新入口的封存轨迹 parity 已通过，但完整原 postflight 未恢复；任务层退化与 target pi 未定义，仍不启动课程训练。具体已实现入口和离线复核 CLI 见 IC02b runbook；原 12 回合预算已消耗，不得重跑，新增 live 数据必须另获批准。

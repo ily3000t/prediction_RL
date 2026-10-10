@@ -4,7 +4,7 @@
 
 **方案有条件可行，适合隔离开发；当前尚不满足启动课程 DDPG 的条件。**
 
-IC00 已建立工作树、记录可行性并冻结基线资产。IC01 已实现独立的 train-only 离线分层审计并完成运行：256 个训练 episode、713 个已到达 root，暂定 C0/C1/C2 为 0/211/502。真实邻车响应证据存在，但三层池退化且 root 不能直接作为原 reset 任务。任务调度器、课程训练 CLI 和课程实验结果仍未实现或运行，不能将本文件当作已通过验收的训练配置。详见 `reports/ic01_training_interaction_acceptance.md`。
+IC00 已建立工作树、记录可行性并冻结基线资产。IC01 已实现独立的 train-only 离线分层审计并完成运行：256 个训练 episode、713 个已到达 root，暂定 C0/C1/C2 为 0/211/502。真实邻车响应证据存在，但三层池退化且 root 不能直接作为原 reset 任务。IC02b 已执行 12 回合/144 控制步，新旧入口的封存轨迹在 12 项精确比较中一致；原最终聚合因 JSON 键表示失败，已单独离线复核，原完整 postflight 未恢复。任务调度器、课程训练 CLI 和课程实验结果仍未实现或运行，不能将本文件当作已通过验收的训练配置。详见 `reports/ic01_training_interaction_acceptance.md` 和 `reports/ic02b_entry_parity_acceptance.md`。
 
 - 基线：`E:/Prediction_RL`，干净的 main，`75051acc06f6ea2ab6dda9be678f191b63d04569`。
 - 新工作树：`E:/Prediction_RL_worktrees_course_learning`。
@@ -143,12 +143,12 @@ G = (R_B3,Curr - R_B2,Curr) - (R_B3,Mix - R_B2,Mix)
 | IC00，已完成 | 来源/资产指纹、隔离工作树、源码级可行性与边界 | 原主目录干净且未修改；未启动训练 |
 | IC01，工程审计完成、任务池未通过 | train-only D/I、重复噪声、支持覆盖、root-task 候选映射分析 | 105 项测试通过；C1 响应存在，C0=0；没有可执行 reset 任务 |
 | IC02a，离线核查完成 | 14 项源码假设及 source-episode 映射；见 `reports/ic02a_entry_design_acceptance.md` | 129 项测试通过；不改 reset、不晋升 task 层；入口提案未批准 |
-| IC02b，有限原型已批准并实现，runtime 待验收 | fresh Gym20 worker 入口及最多 12 回合/144 控制步 smoke | 离线入口/特征/terminal 回归验证；待核查首回合 runtime parity；不替代 task 覆盖 |
+| IC02b，封存轨迹一致性已复核，完整 postflight 未恢复 | fresh Gym20 worker 入口及实际 12 回合/144 控制步 smoke，零新增仿真的独立复核 | 328 项离线测试；12 项精确 parity 通过；原失败保留，最终内存 tensor/RNG 证据缺失；不替代 task 覆盖 |
 | IC03，待实现 | 独立 RNG 固定调度、Mix 配额、外部 replay 审计与单元测试 | 不截断 episode，不修改优化器/回放/网络；真实分布可追溯 |
 | IC04，待实现 | task/阈值/pi 冻结、短工程 smoke、四组用户运行请求 | 所有未定字段已明确；用户确认后才提供可执行训练请求 |
 | IC05，用户运行后 | 全 seed、固定终点聚合与机制诊断 | 负结果正常完成；不换 seed、改阈值、加预算或扩模型 |
 
-IC02a 已完成纯离线源码/映射核查，报告在 `artifacts/ic/ic02a_v1/report.json`。用户已确认 `seeded_fresh_gym20_task_v1` 入口原型与最多 12 个工程 episode/144 控制步的 IC02b smoke；只验证入口，不启动调度或课程训练。若需要新场景分支采集，另提交明确版本、预算、参考控制责任及分层规则，取得用户批准。fresh-task target 不能宣称等同旧 continuous-traffic 分布；不提供尚不存在的课程训练 CLI，也不重复运行旧 120k 请求冒充课程实验。
+IC02a 已完成纯离线源码/映射核查，报告在 `artifacts/ic/ic02a_v1/report.json`。用户已批准的 IC02b 预算已消耗；原 `artifacts/ic/ic02b_v1/failure.json` 不覆盖，独立 `artifacts/ic/ic02b_review_v1/report.json` 只确认封存轨迹 parity，不恢复未采集的最终 postflight。当前不启动调度或课程训练，也不重跑 smoke。若需要新场景分支采集，另提交明确版本、预算、参考控制责任及分层规则，取得用户批准。fresh-task target 不能宣称等同旧 continuous-traffic 分布；不提供尚不存在的课程训练 CLI，也不重复运行旧 120k 请求冒充课程实验。
 
 ## 11. 相关研究与贡献界限
 
