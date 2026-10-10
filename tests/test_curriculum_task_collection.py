@@ -13,6 +13,7 @@ from prediction_rl.curriculum.task_characterization import (PROTOCOL, BudgetLedg
     validate_protocol, validate_actual_budget, root_evidence)
 from prediction_rl.curriculum.task_collector import CountedEnv, CountedObserver
 import prediction_rl.curriculum.task_collector as engine
+import collect_curriculum_tasks as cli
 from prediction_rl.data.merge_geometry import MergeGeometry
 from test_actor_adapter import actor, frame
 from test_curriculum_interaction import example
@@ -167,3 +168,47 @@ def test_engine_failure_always_records_postflight_without_sealing(tmp_path, monk
     assert post['worker_session_rng_restored'] and post['budget'] is None
     assert post['immutable_input_postflight_passed'] == (not postflight_fails)
     assert (tmp_path/'failure.json').is_file() and not (tmp_path/'complete.json').exists()
+
+
+def fresh_directory(tmp_path, binding):
+    (tmp_path/'started.json').write_text(json.dumps({'binding': binding}))
+    (tmp_path/'launch.json').write_text(json.dumps({'command': ['worker']}))
+    (tmp_path/'worker.log').write_text('')
+
+
+def test_parent_started_receipt_is_not_a_session_retry(tmp_path):
+    binding = {'job':'t11000','request_hash':'frozen'}
+    fresh_directory(tmp_path, binding)
+    assert [p.name for p in tmp_path.glob('s*.json')] == ['started.json']
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    cli.require_fresh_worker_directory(tmp_path, binding)
+    assert before == {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+
+
+@pytest.mark.parametrize('name', ['s000.json', 'worker_started.json', 'postflight.json',
+    'failure.json', 'complete.json', 'settings.json', 'discovery.json', 'unexpected.txt'])
+def test_completed_partial_or_unknown_worker_output_refuses_retry(tmp_path, name):
+    fresh_directory(tmp_path, {})
+    (tmp_path/name).write_text('{}')
+    with pytest.raises(ValueError): cli.require_fresh_worker_directory(tmp_path, {})
+
+
+def test_worker_binding_mismatch_refused_before_marker_or_engine(tmp_path):
+    fresh_directory(tmp_path, {'job':'wrong'})
+    with pytest.raises(ValueError, match='binding'): cli.require_fresh_worker_directory(tmp_path, {'job':'right'})
+    assert not (tmp_path/'worker_started.json').exists()
+
+
+def test_real_worker_preflight_enters_engine_once_with_only_parent_setup_files(tmp_path, monkeypatch):
+    job = {'id':'t11000'}
+    q = {'jobs':[job], 'baseline_root':'readonly', 'design':{}, 'metric_config':{}, 'normalization_scales':{}}
+    path = tmp_path/'request.json'; (tmp_path/'started.json').write_text('{}')
+    output = tmp_path/job['id']; output.mkdir(); fresh_directory(output, cli.binding(q,job))
+    monkeypatch.setattr(cli, 'load', lambda *a: (path,q))
+    monkeypatch.setattr(cli.torch, 'set_num_threads', lambda *a: None)
+    calls = []
+    monkeypatch.setattr(engine, 'collect_task', lambda *a: calls.append(a))
+    cli.worker(path, 'hash', job['id'])
+    assert len(calls) == 1 and (output/'worker_started.json').is_file()
+    with pytest.raises(ValueError): cli.worker(path, 'hash', job['id'])
+    assert len(calls) == 1

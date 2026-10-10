@@ -122,6 +122,18 @@ def binding(q, job):
     return {'request_hash': digest(q), 'job': job}
 
 
+def require_fresh_worker_directory(output, expected_binding):
+    # Only the parent's three setup files may exist. Prefix matching 's*.json'
+    # also matches started.json, and falsely treats a fresh worker as a retry.
+    output = Path(output)
+    allowed = {'started.json', 'launch.json', 'worker.log'}
+    if (not (output/'started.json').is_file()
+            or {p.name for p in output.iterdir()}-allowed):
+        raise ValueError('Started/incomplete worker cannot be automatically retried')
+    if read(output/'started.json')['binding'] != expected_binding:
+        raise ValueError('Worker receipt binding changed')
+
+
 def worker(path, expected, job_id):
     path, q = load(path, expected)
     if (not (path.parent/'started.json').is_file() or (path.parent/'report.json').exists()
@@ -129,12 +141,7 @@ def worker(path, expected, job_id):
         raise ValueError('Worker requires the authorized parent invocation')
     job = next(j for j in q['jobs'] if j['id'] == job_id)
     output = path.parent/job_id
-    if (not (output/'started.json').is_file() or (output/'complete.json').exists()
-            or (output/'postflight.json').exists() or (output/'failure.json').exists() or (output/'worker_started.json').exists()
-            or any(output.glob('s*.json'))):
-        raise ValueError('Started/incomplete worker cannot be automatically retried')
-    if read(output/'started.json')['binding'] != binding(q, job):
-        raise ValueError('Worker receipt binding changed')
+    require_fresh_worker_directory(output, binding(q, job))
     write_once(output/'worker_started.json', {'binding': binding(q, job), 'started_at': now()})
     torch.set_num_threads(PROTOCOL['torch_threads'])
     from prediction_rl.curriculum.task_collector import collect_task
