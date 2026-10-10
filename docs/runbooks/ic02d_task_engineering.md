@@ -1,5 +1,11 @@
 # IC02d：三任务工程运行
 
+## 当前状态：旧请求已失败，以下命令仅保留历史
+
+`ic02d_eng_v1` 已尝试，worker 的残留文件 wildcard 错误匹配父进程 `started.json`，在 SUMO 启动前退出。实际 0 会话/控制步/分叉；错误已离线修复，399 项测试通过。原请求和失败不可覆盖，当前源码 commit 也已不同，**不要再次执行以下 run 或通过换名重试**。修复版新命名请求需要用户确认；详见 `reports/ic02d_engineering_preflight_failure.md`。
+
+## 已实现的历史入口与预算
+
 只在 `E:/Prediction_RL_worktrees_course_learning` 执行。先提交测试过的 collector，使当前 codex 分支干净；旧基线只读。预算固定且已获用户批准，不是完整课程池或训练。
 
 ```powershell

@@ -28,3 +28,7 @@ offline 根证据用原 train-only D/关键车辆/I 支持定义和旧训练数�
 测试、审查并原子提交后才准备、执行有限请求。单一 run ID 不允许更名重置预算；started 无 complete 不自动重跑；失败保存并暂停，禁止换种子或降低要求。负响应或截尾仍可完成工程存证，不是应删除的场景。
 
 运行命令见 `docs/runbooks/ic02d_task_engineering.md`。本阶段通过后先分析三个任务工程证据，再由用户单独批准其余 29-task 覆盖，不自动进入课程训练、合并 main、推送或创建 milestone tag。
+
+## 实际状态
+
+初次请求 `ic02d_eng_v1` 在 worker 预检误把 `started.json` 当 session 残留，启动 SUMO 前失败，0 会话/控制步/分叉。allowlist 修复及 399 项离线测试已完成；原 failure/请求不变，未重跑。下一步需要用户确认修复源码下同三任务、同上限的新命名请求，不能把本阶段描述为 runtime 已通过。见 `reports/ic02d_engineering_preflight_failure.md`。
