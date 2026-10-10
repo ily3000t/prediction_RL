@@ -15,6 +15,8 @@ E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B -m pytest -q -p no:cacheprov
 
 ## 离线核查（需干净工作树）
 
+`ic02a_v1` 已运行完成，以下保留实际命令供溯源，不要再次使用相同 run ID。129 项测试通过，14 项静态假设通过；实际验收见 `reports/ic02a_entry_design_acceptance.md`。
+
 ```powershell
 E:\Programs\EnvAnaconda3\envs\pytorch\python.exe -B tools/audit_curriculum_entry.py --baseline-root E:\Prediction_RL --run-id ic02a_v1
 ```

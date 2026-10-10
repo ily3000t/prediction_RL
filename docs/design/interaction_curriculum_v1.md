@@ -142,13 +142,13 @@ G = (R_B3,Curr - R_B2,Curr) - (R_B3,Mix - R_B2,Mix)
 | --- | --- | --- |
 | IC00，已完成 | 来源/资产指纹、隔离工作树、源码级可行性与边界 | 原主目录干净且未修改；未启动训练 |
 | IC01，工程审计完成、任务池未通过 | train-only D/I、重复噪声、支持覆盖、root-task 候选映射分析 | 105 项测试通过；C1 响应存在，C0=0；没有可执行 reset 任务 |
-| IC02a，已实现离线入口核查，待运行 | 源码/映射及新入口设计；见 `docs/design/curriculum_task_entry_v1.md` | 不改 reset；不把 source root 层晋升为 task 层；入口提案未批准 |
+| IC02a，离线核查完成 | 14 项源码假设及 source-episode 映射；见 `reports/ic02a_entry_design_acceptance.md` | 129 项测试通过；不改 reset、不晋升 task 层；入口提案未批准 |
 | IC02b，待批准及实现 | 合法任务入口协议与有限确定性 smoke | 同原首回合对齐；四组共同协议；入口通过不替代 task 覆盖 |
 | IC03，待实现 | 独立 RNG 固定调度、Mix 配额、外部 replay 审计与单元测试 | 不截断 episode，不修改优化器/回放/网络；真实分布可追溯 |
 | IC04，待实现 | task/阈值/pi 冻结、短工程 smoke、四组用户运行请求 | 所有未定字段已明确；用户确认后才提供可执行训练请求 |
 | IC05，用户运行后 | 全 seed、固定终点聚合与机制诊断 | 负结果正常完成；不换 seed、改阈值、加预算或扩模型 |
 
-IC02a 先完成纯离线源码/映射核查。随后请用户确认 `seeded_fresh_gym20_task_v1` 入口原型与最多 12 个工程 episode/144 个控制步的 IC02b smoke；不启动调度或课程训练。若需要新场景分支采集，另提交明确版本、预算、参考控制责任及分层规则，取得用户批准。fresh-task target 不能宣称等同旧 continuous-traffic 分布；不提供尚不存在的课程训练 CLI，也不重复运行旧 120k 请求冒充课程实验。
+IC02a 已完成纯离线源码/映射核查，报告在 `artifacts/ic/ic02a_v1/report.json`。下一步请用户确认 `seeded_fresh_gym20_task_v1` 入口原型与最多 12 个工程 episode/144 个控制步的 IC02b smoke；不启动调度或课程训练。若需要新场景分支采集，另提交明确版本、预算、参考控制责任及分层规则，取得用户批准。fresh-task target 不能宣称等同旧 continuous-traffic 分布；不提供尚不存在的课程训练 CLI，也不重复运行旧 120k 请求冒充课程实验。
 
 ## 11. 相关研究与贡献界限
 
