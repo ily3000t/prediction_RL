@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "protocol_id": "ic02a-entry-feasibility-v1",
+  "scope": "offline_source_and_mapping_only",
+  "baseline_references": "provenance/interaction_curriculum_baseline_v1.json",
+  "ic01_report": "artifacts/ic/ic01_v1/report.json",
+  "ic01_report_sha256": "5479b3deac1bebad28101afc50c1b9668aa39afd581d971b77e3bb27228acb7b",
+  "proposed_entry_contract": "seeded_fresh_gym20_task_v1",
+  "proposal_status": "unapproved_not_implemented",
+  "policy_start": "original_reset_first_observation",
+  "reference_prefix_before_policy_steps": 0,
+  "prefill_predictor_history": false,
+  "environment_rng_scope": "environment_worker_only",
+  "learner_rng_scope": "persistent_learner_not_reseeded_by_task",
+  "matched_arms": ["b2_mix", "b2_curriculum", "b3_mix", "b3_curriculum"],
+  "target_distribution_pi": null,
+  "task_classifier": "unresolved_no_root_label_promoted_to_episode",
+  "smoke_proposal": {
+    "authorized": false,
+    "simulator_seeds": [11000, 11001, 11002],
+    "adapters": ["original_direct", "proposed_worker_entry"],
+    "repeats": 2,
+    "requested_jerks": [0, 2.5, -2.5, 5, -5, 0, 0, 2.5, -2.5, 0, 0, 0],
+    "max_control_steps_per_episode": 12,
+    "optimizer_updates": 0,
+    "predictor_modes": ["ordinary", "conditional"],
+    "bounded_cap_is_not_mdp_terminal": true
+  },
+  "training_ready": false
+}
