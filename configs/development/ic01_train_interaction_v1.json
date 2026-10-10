@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "protocol_id": "ic01-train-neighbor-interaction-v1",
+  "scope": "train",
+  "baseline_references": "provenance/interaction_curriculum_baseline_v1.json",
+  "critical_roles": ["target_front", "target_rear", "nearest_cross_path_arrival", "lowest_same_path_ttc"],
+  "sensor_radius_m": 125,
+  "conflict_horizon_s": 5,
+  "tick_s": 0.2,
+  "horizon_steps": 25,
+  "probe_jerks": [-5, -2.5, 0, 2.5, 5],
+  "minimum_common_steps": 5,
+  "minimum_supported_pair_fraction": 0.8,
+  "lower_quantile": 0.3333333333333333,
+  "upper_quantile": 0.6666666666666666,
+  "scale_quantile": 0.5,
+  "response_epsilon": 1e-10,
+  "C1_maximum_critical_actors": 3,
+  "minimum_layer_episodes": 10,
+  "classification": "provisional_root_only_not_training_release",
+  "training_ready": false
+}
