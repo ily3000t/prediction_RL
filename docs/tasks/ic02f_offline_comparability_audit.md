@@ -31,3 +31,7 @@ python -B tools/audit_curriculum_tasks.py run --request artifacts/ic/ic02f_audit
 ## 暂停与交接
 
 源证据不一致、任务缺失、无共同有效前缀时保存失败并暂停，不降低标准。完成后提出 task-level D/I 规则与明确命名的有限池目标分布供人工审查；本阶段不实施分类或训练。固定步长的 32 任务不宣称是原 continuous-traffic 目标分布的无偏样本。
+
+## 实际状态
+
+已在实现 commit `24b908d…` 完成命名请求，32 项全部通过，0 新会话/推理/训练。470 项离线测试通过；共同 dense 前缀为 14 ticks，独立直接公式复核 480 个窗口一致。原指标与基线未改。详细发现、文件哈希与剩余设计边界见 `reports/ic02f_offline_comparability_acceptance.md`；仍未赋层或放行训练。
