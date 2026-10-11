@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "protocol_id": "ic02f-sealed-train-task-comparability-audit-v1",
+  "run_id": "ic02f_audit_v1",
+  "scope": "offline_train_only",
+  "tasks": 32,
+  "root_checkpoints": ["reset", "early_ramp", "approach"],
+  "fixed_window_grid_steps": [5, 10, 15, 25],
+  "common_prefix_selection": "minimum_all_candidate_all_critical_actor_dense_prefix_over_all_96_roots",
+  "common_prefix_status": "exploratory_observed_support_ceiling_not_training_contract",
+  "normalization": "unchanged_IC01_dv_ds",
+  "actor_sets": ["all_critical", "target_front_rear"],
+  "task_layer_assignment_authorized": false,
+  "new_sumo_sessions_authorized": false,
+  "predictor_inference_authorized": false,
+  "predictor_training_authorized": false,
+  "ddpg_training_authorized": false,
+  "training_ready": false,
+  "task_classifier": null,
+  "target_distribution_pi": null
+}
