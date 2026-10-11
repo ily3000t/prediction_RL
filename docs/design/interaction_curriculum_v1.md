@@ -176,3 +176,9 @@ IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分
 用户在审阅 IC02g 之后明确提出 L/M/H 三个互斥交互强度层，并批准开始实现。新研究不再以低控制难度作为首层要求；旧 C0/C1/C2 规则、1/11/20 结果及覆盖失败均保持不变，不描述为被修复或通过。
 
 新的独立设计见 `docs/design/interaction_intensity_curriculum_v1.md`，配置为 `configs/development/ic02h_interaction_intensity_v1.json`。固定调度改为 0–20k 的 60/30/10、20–60k 的 20/20/60、60–120k 的有限池 target；D 仅作独立描述。已有源码新增纯离线分层、独立 RNG 回合边界采样与 replay 曝光审计核心，尚未接入持久 DDPG learner 或提供课程训练命令。下一项工程接入与真实 smoke 仍须先通过阶段验收；不从提案 coverage 自动获得训练授权。
+
+## 13. IC03：离线持久 learner 接入已验证
+
+最新接入设计见 `docs/design/curriculum_persistent_integration_v1.md`。新增任务流封装和真实 replay tuple/minibatch 外部观察器；保留原 ALL episode/update loop，同一 learner 跨单回合 worker 存续，终止 store 后才允许切换。22 项新增测试与全项目 1,240 项离线回归通过，冻结资产与旧报告不变。
+
+目前只有 offline integration purpose、合成 worker 测试与下一项明确预算提案；真实 SUMO smoke、live task manifest 和正式训练 CLI 仍未执行/发布。旧 IC02h 记录中的“尚未接入”描述的是该阶段历史状态，不覆盖为已通过真实闭环验收。下一项拟四条路径各两个原生回合、最多 8 会话/4,000 控制步、零 optimizer 更新，需要独立冻结请求并取得用户确认。
