@@ -1,0 +1,20 @@
+{
+  "protocol_id": "ic03b_approved_bounded_integration_smoke_v1",
+  "run_id": "ic03b_smoke_v1",
+  "approved_on": "2026-10-11",
+  "human_message": "继续",
+  "context": "Human continued after the explicit final proposal: four arms, two native episodes per arm, at most eight SUMO sessions and 4000 control steps, zero optimizer updates.",
+  "maximum_sumo_sessions": 8,
+  "maximum_control_steps": 4000,
+  "maximum_raw_ticks": 4816,
+  "maximum_feature_calls": 4008,
+  "episodes_per_arm": 2,
+  "optimizer_updates_authorized": false,
+  "formal_training_authorized": false,
+  "predictor_training_authorized": false,
+  "new_counterfactual_branches": 0,
+  "automatic_retry_authorized": false,
+  "old_baseline_access": "read_only",
+  "merge_main_authorized": false,
+  "push_authorized": false
+}

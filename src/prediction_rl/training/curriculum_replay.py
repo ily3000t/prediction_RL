@@ -13,11 +13,15 @@ class PersistentTaskReplayAudit:
     Bind record to make_all_environment, then install once on a freshly created
     agent. Retain the same SingleEnvExperiment/TimeFeature/agent for every task.
     Optional events can be streamed to a run ledger; no full trajectories are
-    retained here. This IC03 core only supports offline integration tests.
+    retained here. IC03b additionally permits its explicit zero-update smoke;
+    neither scope authorizes formal training.
     """
     def __init__(self, stream, *, purpose, on_event=None, recent_window=1024):
-        if purpose != 'offline_integration_test_only' or (on_event is not None and not callable(on_event)):
+        from prediction_rl.curriculum.integration_smoke import SCOPE
+        if (purpose not in ('offline_integration_test_only', SCOPE) or stream.purpose != purpose
+                or (on_event is not None and not callable(on_event))):
             raise ValueError('IC03 is not a live training authorization')
+        self.purpose = purpose
         self.stream = stream
         self.on_event = on_event
         self.recent_window = recent_window
@@ -35,6 +39,11 @@ class PersistentTaskReplayAudit:
         if (self.inner is not None or checked.evaluation_only or type(inner) is not CheckedReplayBuffer
                 or len(inner) or core._state is not None or core._frames_seen != 0):
             raise ValueError('Install once before the fresh learner has acted; no weights-only resume')
+        from prediction_rl.curriculum.integration_smoke import SCOPE
+        if self.purpose == SCOPE:
+            from prediction_rl.training.all_ddpg import resolved_preset
+            if checked.preset_parameters != resolved_preset('cpu', .0002, smoke=False):
+                raise ValueError('Real smoke must retain original warmup, batch and optimizer preset')
         base = inner.inner
         if type(base).__name__ != 'ExperienceReplayBuffer' or base.pos != 0:
             raise ValueError('Require the unchanged original uniform replay')
@@ -140,7 +149,9 @@ class PersistentTaskReplayAudit:
         return {**self.audit.snapshot(), 'original_replay_size': len(self.inner),
             'original_replay_position': self.base.pos, 'reset_bridge_transitions': 0,
             'terminal_transition_acknowledged_before_reset': True,
-            'original_train_loop_retained': True, 'formal_training_authorized': False}
+            'original_train_loop_retained': True, 'audit_scope': self.purpose,
+            'bounded_smoke_execution_authorized':self.purpose == 'ic03b_approved_bounded_integration_smoke_v1',
+            'formal_training_authorized': False}
 
     def detach(self):
         """Restore only this buffer's hook; learner/replay/optimizer are not reset."""

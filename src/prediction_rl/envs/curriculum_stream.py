@@ -1,7 +1,7 @@
 """Episode-boundary task transport core, not a training authorization or CLI.
 
-The injected factory has the FreshGym20TaskEnv interface. IC03 tests inject
-synthetic workers only; live factories require a separately approved receipt.
+The injected factory has the FreshGym20TaskEnv interface. IC03b adds only the
+explicitly approved two-episode smoke scope; formal training is not authorized.
 """
 from copy import deepcopy
 
@@ -31,9 +31,12 @@ class CurriculumTaskStream:
     reset_contract = ENTRY_CONTRACT
 
     def __init__(self, sampler, worker_factory, observation_space, action_space, *, purpose):
-        if (purpose != 'offline_integration_test_only'
-                or type(sampler) is not OfflineEpisodeSampler or not callable(worker_factory)):
-            raise ValueError('IC03 core does not authorize live SUMO or matched training')
+        from prediction_rl.curriculum.integration_smoke import SCOPE, SmokeEpisodeSampler
+        permitted = ((purpose == 'offline_integration_test_only' and type(sampler) is OfflineEpisodeSampler)
+                     or (purpose == SCOPE and type(sampler) is SmokeEpisodeSampler))
+        if not permitted or not callable(worker_factory):
+            raise ValueError('Require an offline or approved bounded-smoke binding; no matched training')
+        self.purpose = purpose
         if (observation_space.shape != (20,) or observation_space.dtype != np.float32
                 or action_space.shape != (1,) or action_space.dtype != np.float32
                 or not np.array_equal(action_space.low, [-5.])
