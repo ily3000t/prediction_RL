@@ -166,8 +166,13 @@ def learner_hashes(checked):
     return result
 
 
-def worker(path, expected, job_id):
-    path, q = load(path, expected)
+def worker(path, expected, job_id, *, request_loader=None, sampler_protocol=None):
+    # Explicit dependency injection for the separately approved remaining-arm
+    # coordinator; no global loader patch or relaxation of the original request.
+    request_loader = load if request_loader is None else request_loader
+    path, q = request_loader(path, expected)
+    sampler_protocol = q['protocol'] if sampler_protocol is None else sampler_protocol
+    validate_protocol(sampler_protocol)
     job = next(j for j in q['jobs'] if j['id'] == job_id)
     if (not (path.parent/'started.json').is_file() or (path.parent/'report.json').exists()
             or (path.parent/'failure.json').exists()):
@@ -208,7 +213,7 @@ def worker(path, expected, job_id):
         from gym.spaces import Box
         spaces = {name:Box(np.asarray(spec['low'],np.float32),np.asarray(spec['high'],np.float32),dtype=np.float32)
                   for name,spec in q['native_spaces'].items()}
-        sampler = SmokeEpisodeSampler(q['smoke_task_roster'],job,expected,q['protocol'])
+        sampler = SmokeEpisodeSampler(q['smoke_task_roster'],job,expected,sampler_protocol)
         task_stream = CurriculumTaskStream(sampler,factory,spaces['observation'],spaces['action'],purpose=SCOPE)
         def emit(kind, value):
             replay_log.append(json_safe({'kind':kind,'value':value}))
@@ -252,8 +257,9 @@ def worker(path, expected, job_id):
         streams.clear()
         if any(name in sys.modules for name in ('config','control','merge_gym','sumo','prediction','dqn','st','st_cy')):
             raise ValueError('Upstream module escaped into persistent learner process')
-        load(path, expected)
-        row = {'job':job,'episodes':episode_rows,'actual_control_steps':snapshot['actual_control_steps'],
+        request_loader(path, expected)
+        row = {'job':job,'execution_request_version':q['version'],
+            'episodes':episode_rows,'actual_control_steps':snapshot['actual_control_steps'],
             'raw_ticks':sum(r['raw_ticks'] for r in episode_rows),'feature_calls':provider.calls,
             'optimizer_updates':0,'original_minibatches':audit.sample_calls,
             'original_agent_calls':experiment._agent.agent._frames_seen,
@@ -278,8 +284,10 @@ def worker(path, expected, job_id):
         for log in streams: log.close()
 
 
-def execute(path, expected):
-    path, q = load(path, expected)
+def execute(path, expected, *, request_loader=None, worker_script=None):
+    request_loader = load if request_loader is None else request_loader
+    worker_script = Path(__file__).resolve() if worker_script is None else Path(worker_script).resolve()
+    path, q = request_loader(path, expected)
     out = path.parent
     if any((out/name).exists() for name in ('started.json','report.json','failure.json')):
         raise ValueError('No automatic replay of completed, failed or interrupted smoke')
@@ -287,6 +295,8 @@ def execute(path, expected):
         'started_at':now(),'launch_command':subprocess.list2cmdline(sys.orig_argv),
         'protocol':q['protocol'],'runtime':q['runtime'],'jobs':[], 'formal_training_authorized':False,
         'training_ready':False,'test_opened':False,'new_counterfactual_branches':0}
+    if 'prior_evidence_review' in q:
+        report['prior_evidence_review'] = deepcopy(q['prior_evidence_review'])
     before = rng_fingerprint()
     with run_lock(out):
         write_once(out/'started.json',report)
@@ -294,7 +304,7 @@ def execute(path, expected):
             for job in q['jobs']:
                 directory = out/job['id']; directory.mkdir(exist_ok=False)
                 write_once(directory/'started.json',{'request_hash':expected,'job':job,'started_at':now()})
-                command = [sys.executable,'-B',str(Path(__file__).resolve()),'worker','--request',str(path),
+                command = [sys.executable,'-B',str(worker_script),'worker','--request',str(path),
                            '--confirm-request-hash',expected,'--job',job['id']]
                 write_once(directory/'launch.json',{'command':command})
                 print('smoke_arm_start='+job['id'],flush=True)
@@ -313,15 +323,19 @@ def execute(path, expected):
             controls = sum(r['actual_control_steps'] for r in report['jobs'])
             ticks = sum(r['raw_ticks'] for r in report['jobs'])
             calls = sum(r['feature_calls'] for r in report['jobs'])
-            if count != 8 or controls > 4000 or ticks > 4816 or calls > 4008 or before != rng_fingerprint():
+            p = q['protocol']
+            if (count != len(q['jobs'])*p['episodes_per_arm'] or count > p['sumo_sessions_max']
+                    or controls > p['control_steps_max'] or ticks > p['raw_ticks_max']
+                    or calls > p['feature_calls_max'] or before != rng_fingerprint()):
                 raise ValueError('Smoke budget exceeded or coordinator RNG changed')
-            load(path,expected)
+            request_loader(path,expected)
             report.update(status='complete',engineering_gate=True,finished_at=now(),actual_episodes=count,
                 actual_control_steps=controls,raw_ticks=ticks,feature_calls=calls,optimizer_updates=0,
                 parent_rng_unchanged=True,source_postflight_passed=True,
                 remaining_gate='freeze_IC04_formal_request_then_human_approval')
             write_once(out/'report.json',report)
             print('smoke_report='+str(out/'report.json'),flush=True)
+            return report
         except BaseException as error:
             report.update(status='failed',engineering_gate=False,finished_at=now(),failure_type=type(error).__name__,
                           failure_reason=str(error),traceback=traceback.format_exc())
