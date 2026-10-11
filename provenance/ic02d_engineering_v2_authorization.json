@@ -1,0 +1,29 @@
+{
+  "version": "ic02d-human-authorization-v2",
+  "recorded_on": "2026-10-11",
+  "authorization_source": "User replied 继续 after the explicit question approving a repaired new request with the same three seeds and limits, retaining the original zero-SUMO failed report. No predictor/DDPG training or remaining 29 tasks was approved.",
+  "protocol_id": "ic02d-task-engineering-v2",
+  "run_id": "ic02d_eng_v2",
+  "simulator_seeds": [11000, 11008, 11016],
+  "maximum_tasks": 3,
+  "maximum_fresh_sumo_sessions": 114,
+  "maximum_control_steps": 12234,
+  "maximum_candidate_branches": 90,
+  "maximum_raw_ticks": 23862,
+  "predictor_inference_authorized": false,
+  "predictor_training_authorized": false,
+  "ddpg_training_authorized": false,
+  "remaining_29_pilot_tasks_authorized": false,
+  "task_layer_assignment_authorized": false,
+  "merge_main_authorized": false,
+  "push_authorized": false,
+  "old_baseline_access": "read_only",
+  "previous_failed_run": "ic02d_eng_v1",
+  "previous_runtime_consumed": false,
+  "previous_failure_hashes": {
+    "request.json": "d54408e723a453db651427641b0072a7887ad724dcbdebffdbb2f3ac7fe9ca38",
+    "failure.json": "e5ec35fce5608e17d70e7f5e5392c2f8efda141b31fb747a05309ea57c563c2a",
+    "postflight.json": "1f3db5ee5a03d8230e37739f5b9300d01e321a7c53b5c4d993168bce722055d9",
+    "t11000/worker.log": "4a640c7c17968a0181d5e5afc5b75ecf335feb329f70165492876091f7a9ac8f"
+  }
+}

@@ -24,10 +24,15 @@ PROTOCOL = {
     'test_opened': False, 'training_ready': False, 'automatic_retry': False,
 }
 
+# Execution identity only. The failed v1 request and scientific design stay fixed.
+REPAIRED_PROTOCOL = {**PROTOCOL,
+    'version': 'ic02d-task-engineering-v2', 'run_id': 'ic02d_eng_v2',
+    'authorization': 'provenance/ic02d_engineering_v2_authorization.json'}
+
 
 def validate_protocol(value, design):
     validate_design(design)
-    if not isinstance(value, dict) or digest(value) != digest(PROTOCOL):
+    if not isinstance(value, dict) or digest(value) not in (digest(PROTOCOL), digest(REPAIRED_PROTOCOL)):
         raise ValueError('Changed approved three-task engineering scope')
     budget = replay_budget(3, design)
     if (value['simulator_seeds'] != design['engineering_seeds']

@@ -32,3 +32,5 @@ offline 根证据用原 train-only D/关键车辆/I 支持定义和旧训练数�
 ## 实际状态
 
 初次请求 `ic02d_eng_v1` 在 worker 预检误把 `started.json` 当 session 残留，启动 SUMO 前失败，0 会话/控制步/分叉。allowlist 修复及 399 项离线测试已完成；原 failure/请求不变，未重跑。下一步需要用户确认修复源码下同三任务、同上限的新命名请求，不能把本阶段描述为 runtime 已通过。见 `reports/ic02d_engineering_preflight_failure.md`。
+
+用户随后回复“继续”，批准同三任务同预算的独立修复版 `ic02d_eng_v2`。新增 v2 配置与授权，不改旧失败记录；启动时绑定并检查旧零执行证据。新版命令与限制见 `docs/runbooks/ic02d_task_engineering_v2.md`，真实执行结果另记验收报告，尚不能预称 runtime 通过。

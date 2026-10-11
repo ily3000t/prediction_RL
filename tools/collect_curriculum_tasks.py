@@ -11,14 +11,40 @@ sys.path[:0] = [str(ROOT/'src'), str(ROOT/'tools')]
 import torch
 
 from prediction_rl.curriculum.entry_smoke import PROTOCOL as ENTRY_SMOKE, rng_fingerprint
-from prediction_rl.curriculum.task_characterization import PROTOCOL, validate_protocol, validate_actual_budget
+from prediction_rl.curriculum.task_characterization import (REPAIRED_PROTOCOL as PROTOCOL,
+    validate_protocol, validate_actual_budget)
 from prediction_rl.curriculum.task_design import validate_design
 from prediction_rl.curriculum.train_reader import git, inside, strict_json, validate_config
 from prediction_rl.data.collection_store import file_hash as sha, run_lock, seal_episode, verify_episode, write_once
 from prediction_rl.data.dataset_contract import digest
 from smoke_curriculum_entry import inputs as entry_inputs, runtime
 
-CONFIG = 'configs/development/ic02d_task_engineering_v1.json'
+CONFIG = 'configs/development/ic02d_task_engineering_v2.json'
+PREVIOUS_FAILURE_HASHES = {
+    'request.json': 'd54408e723a453db651427641b0072a7887ad724dcbdebffdbb2f3ac7fe9ca38',
+    'failure.json': 'e5ec35fce5608e17d70e7f5e5392c2f8efda141b31fb747a05309ea57c563c2a',
+    'postflight.json': '1f3db5ee5a03d8230e37739f5b9300d01e321a7c53b5c4d993168bce722055d9',
+    't11000/worker.log': '4a640c7c17968a0181d5e5afc5b75ecf335feb329f70165492876091f7a9ac8f',
+}
+
+
+def verify_previous_zero_runtime_failure(repo):
+    """Bind the preserved failed attempt; never erase receipts or retry its worker."""
+    directory = Path(repo)/'artifacts/ic/ic02d_eng_v1'
+    if {p.name for p in directory.iterdir()} != {
+            'request.json', 'preparation.json', 'started.json', 'failure.json', 'postflight.json', 't11000'}:
+        raise ValueError('Previous failed run inventory changed')
+    if {p.name for p in (directory/'t11000').iterdir()} != {'started.json', 'launch.json', 'worker.log'}:
+        raise ValueError('Previous failure no longer has zero worker execution evidence')
+    hashes = {name: sha(directory/name) for name in PREVIOUS_FAILURE_HASHES}
+    if hashes != PREVIOUS_FAILURE_HASHES:
+        raise ValueError('Previous immutable zero-runtime failure bytes changed')
+    failure, post = read(directory/'failure.json'), read(directory/'postflight.json')
+    if (failure['status'] != 'failed' or failure['engineering_gate'] is not False
+            or failure['tasks'] != [] or post['task_attempt_budgets'] != {}
+            or post['parent_rng_unchanged'] is not True or post['immutable_input_postflight_passed'] is not True):
+        raise ValueError('Previous failure consumed runtime or lacks valid postflight')
+    return {'worktree:artifacts/ic/ic02d_eng_v1/'+name: value for name,value in hashes.items()}
 
 
 def now():
@@ -37,7 +63,10 @@ def require_clean():
 def prerequisites(baseline):
     design = validate_design(read(ROOT/PROTOCOL['design_config']))
     protocol = validate_protocol(read(ROOT/CONFIG), design)
+    if protocol != PROTOCOL:
+        raise ValueError('Only the explicitly approved repaired v2 request may be prepared')
     hashes, _, _ = entry_inputs(baseline, ENTRY_SMOKE)
+    hashes.update(verify_previous_zero_runtime_failure(ROOT))
     if git(Path(baseline), 'branch', '--show-current') != 'main':
         raise ValueError('Read-only baseline must retain main')
     report_path = ROOT/protocol['design_report']; report = read(report_path)
@@ -62,6 +91,8 @@ def prerequisites(baseline):
         'ddpg_training_authorized': False, 'remaining_29_pilot_tasks_authorized': False,
         'task_layer_assignment_authorized': False, 'merge_main_authorized': False,
         'push_authorized': False, 'old_baseline_access': 'read_only'}
+    expected.update(previous_failed_run='ic02d_eng_v1', previous_runtime_consumed=False,
+                    previous_failure_hashes=PREVIOUS_FAILURE_HASHES)
     if any(auth.get(k) != v for k,v in expected.items()):
         raise ValueError('Human authorization scope changed')
     policy = inside(Path(baseline), design['reference_checkpoint'])
@@ -88,7 +119,7 @@ def prepare(baseline):
     protocol, design, jobs, hashes, metric, scales = prerequisites(baseline)
     output = ROOT/'artifacts/ic'/protocol['run_id']
     environment = runtime()
-    q = {'version': 'ic02d-task-request-v1', 'git_commit_sha': git(ROOT, 'rev-parse', 'HEAD'),
+    q = {'version': 'ic02d-task-request-v2', 'git_commit_sha': git(ROOT, 'rev-parse', 'HEAD'),
         'working_tree_dirty': False, 'launch_command': subprocess.list2cmdline(sys.orig_argv),
         'prepared_at': now(), 'baseline_root': str(baseline), 'protocol': protocol, 'design': design,
         'jobs': jobs, 'input_hashes': hashes, 'runtime': environment, 'metric_config': metric,
@@ -105,7 +136,7 @@ def load(path, expected):
     if path != ROOT/'artifacts/ic'/PROTOCOL['run_id']/'request.json':
         raise ValueError('Single approved run only; renaming cannot reset the budget')
     q = read(path)
-    if (q['version'] != 'ic02d-task-request-v1' or digest(q) != expected
+    if (q['version'] != 'ic02d-task-request-v2' or digest(q) != expected
             or read(path.parent/'preparation.json')['request_hash'] != expected
             or q['git_commit_sha'] != git(ROOT, 'rev-parse', 'HEAD')
             or q['working_tree_dirty'] is not False or q['human_approved_scope_only'] is not True):

@@ -9,7 +9,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'src'), str(ROOT/'tools')]
-from prediction_rl.curriculum.task_characterization import (PROTOCOL, BudgetLedger, scan_checkpoints,
+from prediction_rl.curriculum.task_characterization import (PROTOCOL, REPAIRED_PROTOCOL, BudgetLedger, scan_checkpoints,
     validate_protocol, validate_actual_budget, root_evidence)
 from prediction_rl.curriculum.task_collector import CountedEnv, CountedObserver
 import prediction_rl.curriculum.task_collector as engine
@@ -29,6 +29,42 @@ def test_new_authorization_does_not_mutate_offline_proposal(design):
     assert validate_protocol(protocol, design) == PROTOCOL
     assert design['runtime_authorized'] is False
     assert protocol['predictor_inference_calls'] == protocol['ddpg_training_steps'] == 0
+
+
+def test_repaired_scope_changes_only_execution_identity(design):
+    new = json.loads((ROOT/'configs/development/ic02d_task_engineering_v2.json').read_text())
+    assert validate_protocol(new, design) == REPAIRED_PROTOCOL == cli.PROTOCOL
+    assert {key for key in new if new[key] != PROTOCOL[key]} == {'version', 'run_id', 'authorization'}
+    assert design['runtime_authorized'] is False
+
+
+@pytest.mark.parametrize('field,value', [('simulator_seeds', [11000,11001,11002]),
+    ('workers',2), ('tasks_max',32), ('raw_ticks_max',99999), ('automatic_retry',True),
+    ('training_ready',True), ('task_classifier','old_root_levels'), ('unknown',0)])
+def test_repaired_scope_cannot_expand(design, field, value):
+    new = deepcopy(REPAIRED_PROTOCOL); new[field] = value
+    with pytest.raises(ValueError): validate_protocol(new, design)
+
+
+@pytest.mark.parametrize('fault', [None, 'bytes', 'worker_started.json', 's000.json', 'new_task'])
+def test_repaired_request_requires_preserved_zero_runtime_failure(tmp_path, monkeypatch, fault):
+    old = tmp_path/'artifacts/ic/ic02d_eng_v1'
+    (old/'t11000').mkdir(parents=True)
+    for name in ('request.json', 'preparation.json', 'started.json', 't11000/started.json', 't11000/launch.json'):
+        (old/name).write_text('{}')
+    (old/'failure.json').write_text(json.dumps({'status':'failed', 'engineering_gate':False, 'tasks':[]}))
+    (old/'postflight.json').write_text(json.dumps({'task_attempt_budgets':{}, 'parent_rng_unchanged':True,
+                                                 'immutable_input_postflight_passed':True}))
+    (old/'t11000/worker.log').write_text('fixture preflight failure; no model or simulator')
+    monkeypatch.setattr(cli, 'PREVIOUS_FAILURE_HASHES', {name:cli.sha(old/name) for name in cli.PREVIOUS_FAILURE_HASHES})
+    if fault == 'bytes': (old/'failure.json').write_text('{}')
+    elif fault == 'new_task': (old/'t11008').mkdir()
+    elif fault is not None: (old/'t11000'/fault).write_text('{}')
+    if fault is None:
+        result = cli.verify_previous_zero_runtime_failure(tmp_path)
+        assert len(result) == 4
+    else:
+        with pytest.raises(ValueError): cli.verify_previous_zero_runtime_failure(tmp_path)
 
 
 @pytest.mark.parametrize('field,value', [('simulator_seeds', [11000,11001,11002]),
