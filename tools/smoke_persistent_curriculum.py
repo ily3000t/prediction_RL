@@ -263,7 +263,9 @@ def worker(path, expected, job_id):
             'predictor_frozen':True,'source_postflight_passed':True,'replay_audit':snapshot,
             'formal_training_authorized':False,'finished_at':now()}
         write_once(out/'summary.json',json_safe(row))
-        seal_episode(out,{'request_hash':expected,'job':job},json_safe(row))
+        # The coordinator owns worker.log until this process exits. Even this
+        # final message, stdout flushing and finally cleanup can change files,
+        # so the child must not publish an immutable directory receipt here.
         print('smoke_arm_complete='+job_id+' steps='+str(row['actual_control_steps']),flush=True)
     except BaseException as error:
         write_once(out/'failure.json', {'request_hash':expected,'job':job,'finished_at':now(),
@@ -298,7 +300,13 @@ def execute(path, expected):
                 print('smoke_arm_start='+job['id'],flush=True)
                 with (directory/'worker.log').open('x',encoding='utf-8') as log:
                     subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
-                row = verify_episode(directory,{'request_hash':expected,'job':job})['metadata']
+                # Successful process exit includes its finally cleanup. Close
+                # the parent's stdout handle too, then seal ALL final files;
+                # never exclude worker.log or repair an existing bad receipt.
+                row = entry.read(directory/'summary.json')
+                binding = {'request_hash':expected,'job':job}
+                seal_episode(directory,binding,row)
+                row = verify_episode(directory,binding)['metadata']
                 report['jobs'].append(row)
                 print('smoke_arm_complete='+job['id']+' steps='+str(row['actual_control_steps']),flush=True)
             count = sum(len(r['episodes']) for r in report['jobs'])

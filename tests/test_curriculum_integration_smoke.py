@@ -1,4 +1,4 @@
-"""IC03b scope/budget tests. No SUMO, real predictor inference or learner run."""
+"""IC03b scope/budget tests. Synthetic learner loops, no SUMO or real inference."""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -190,3 +190,75 @@ def test_approved_scope_original_loop_and_initial_target_hash_without_sumo(tmp_p
     assert not experiment._agent.agent.policy._optimizer.state
     with pytest.raises(ValueError): env.reset()
     experiment._writer.close(); env.close()
+
+
+def test_parent_seals_after_child_cleanup_and_stdout_close(tmp_path,monkeypatch):
+    import smoke_persistent_curriculum as cli
+    from prediction_rl.data.collection_store import read_json, verify_episode, write_once
+    plan = jobs(task_roster(proposals()))
+    request = tmp_path/'request.json'
+    q = {'git_commit_sha':'synthetic-source', 'protocol':deepcopy(PROTOCOL), 'runtime':{}, 'jobs':plan}
+    write_once(request,q)
+    monkeypatch.setattr(cli,'load',lambda path,expected:(request,q))
+    handles = []
+    original_seal = cli.seal_episode
+
+    def finished_child(command,**kwargs):
+        job_id = command[command.index('--job')+1]
+        job = next(j for j in plan if j['id'] == job_id)
+        directory = tmp_path/job_id
+        assert not (directory/'complete.json').exists()
+        handles.append(kwargs['stdout'])
+        row = {'job':job, 'episodes':[{'actual_control_steps':1}]*2,
+               'actual_control_steps':2, 'raw_ticks':204, 'feature_calls':2}
+        write_once(directory/'summary.json',row)
+        # Model the actual bug: summary exists before final stdout and cleanup.
+        kwargs['stdout'].write('smoke_arm_complete='+job_id+'\n')
+        kwargs['stdout'].flush()
+        write_once(directory/'cleanup_finished.json',{'closed':True})
+        return SimpleNamespace(returncode=0)
+
+    def seal_after_exit(directory,binding,metadata):
+        assert handles[-1].closed
+        assert (directory/'cleanup_finished.json').is_file()
+        return original_seal(directory,binding,metadata)
+
+    monkeypatch.setattr(cli.subprocess,'run',finished_child)
+    monkeypatch.setattr(cli,'seal_episode',seal_after_exit)
+    cli.execute(request,'a'*64)
+    report = read_json(tmp_path/'report.json')
+    assert report['engineering_gate'] and report['actual_episodes'] == 8
+    assert report['actual_control_steps'] == 8
+    for job in plan:
+        binding = {'request_hash':'a'*64,'job':job}
+        receipt = verify_episode(tmp_path/job['id'],binding)
+        assert {'worker.log','cleanup_finished.json'}.issubset(receipt['files'])
+    # Integrity remains strict: a later log mutation is still rejected.
+    with (tmp_path/plan[0]['id']/'worker.log').open('a') as log:
+        log.write('unexpected late mutation\n')
+    with pytest.raises(ValueError,match='artifacts changed'):
+        verify_episode(tmp_path/plan[0]['id'],{'request_hash':'a'*64,'job':plan[0]})
+
+
+def test_failed_child_cannot_publish_receipt_or_automatically_retry(tmp_path,monkeypatch):
+    import smoke_persistent_curriculum as cli
+    from prediction_rl.data.collection_store import read_json, write_once
+    plan = jobs(task_roster(proposals()))
+    request = tmp_path/'request.json'
+    q = {'git_commit_sha':'synthetic-source', 'protocol':deepcopy(PROTOCOL), 'runtime':{}, 'jobs':plan}
+    write_once(request,q)
+    monkeypatch.setattr(cli,'load',lambda path,expected:(request,q))
+    calls = []
+
+    def failed_child(command,**kwargs):
+        calls.append(command)
+        write_once(tmp_path/plan[0]['id']/'summary.json',{'partial':True})
+        raise cli.subprocess.CalledProcessError(1,command)
+
+    monkeypatch.setattr(cli.subprocess,'run',failed_child)
+    with pytest.raises(cli.subprocess.CalledProcessError): cli.execute(request,'a'*64)
+    assert read_json(tmp_path/'failure.json')['engineering_gate'] is False
+    assert not (tmp_path/plan[0]['id']/'complete.json').exists()
+    assert not (tmp_path/plan[1]['id']).exists()
+    with pytest.raises(ValueError,match='No automatic replay'): cli.execute(request,'a'*64)
+    assert len(calls) == 1
