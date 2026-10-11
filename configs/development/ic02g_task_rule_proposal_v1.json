@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "protocol_id": "ic02g-task-rule-proposal-v1",
+  "run_id": "ic02g_rules_v1",
+  "scope": "offline_train_proposal_review_only",
+  "task_seeds": [11000,11008,11016,11024,11032,11040,11048,11056,11064,11072,11080,11088,11096,11104,11112,11120,11128,11136,11144,11152,11160,11168,11176,11184,11192,11200,11208,11216,11224,11232,11240,11248],
+  "checkpoints": ["reset","early_ramp","approach"],
+  "anchor": "approach",
+  "window_steps": 14,
+  "I_aggregation": "maximum_over_root_critical_actors_of_pair_time_mean_normalized_response",
+  "normalization": "unchanged_IC01_dv_ds",
+  "noise_floor": "maximum_original_approach_repeat_noise_bound",
+  "lower_quantile": 0.3333333333333333,
+  "upper_quantile": 0.6666666666666666,
+  "response_epsilon": 1e-10,
+  "C0": {
+    "low_I": true,
+    "require_both_distinct_target_actors": true,
+    "require_positive_minimum_route_projected_gap": true,
+    "maximum_closing_speed_rule": "at_most_lower_train_task_tercile"
+  },
+  "C1": {
+    "high_I": true,
+    "strictly_above_repeat_noise": true,
+    "maximum_critical_actors": 3
+  },
+  "priority": ["C0","C1","C2"],
+  "boundary_ties": "inclusive_quantiles_no_task_id_tiebreak",
+  "minimum_unique_tasks_per_level": 10,
+  "target_proposal": "finite_train_task32_gym20_uniform_v1",
+  "target_task_weight": "1_over_32",
+  "original_continuing_traffic_distribution_claim": false,
+  "task_layer_assignment_authorized": false,
+  "schedule_execution_authorized": false,
+  "new_sumo_sessions_authorized": false,
+  "predictor_inference_authorized": false,
+  "predictor_training_authorized": false,
+  "ddpg_training_authorized": false,
+  "training_ready": false,
+  "task_classifier": null,
+  "target_distribution_pi": null
+}
