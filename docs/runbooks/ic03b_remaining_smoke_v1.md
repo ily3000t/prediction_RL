@@ -24,3 +24,9 @@ python -B tools/smoke_remaining_curriculum.py run --request artifacts/ic/ic03b_r
 ## 实现的离线测试
 
 19 项新增测试覆盖范围不可扩张、旧失败字节不变与独立 raw-event 重算、原科学来源不可忽略、仅三组任务、收据关闭后封存、失败停止且禁止再执行、累计预算包含旧消耗、六会话而非旧八会话 gate，以及每组 sampler 只能显式复用原契约。定向回归 77 passed（8.84 秒），全项目离线回归 1,295 passed（36.83 秒、两个原作者 torch.load FutureWarning）。这些测试没有启动新的 SUMO 或真实 predictor 推理，不代表六回合实际验收已完成。
+
+## 2026-10-11 真实执行已完成
+
+实现提交 `83440d967f64269a18a42d503aa5e8fd20ec6b09` 上冻结并执行，request hash 为 `3f5f910adbda5ed1242e19d7630fe85d03a3d2e1d507f242f076bb95e9d98ec4`。新六回合完成：1,147 控制步、1,753 raw ticks、1,147 特征调用、零优化更新；三组收据及独立 raw/replay 复核通过，engineering_gate=true。旧加新八会话共 1,282 控制步/2,090 ticks；旧失败/失效收据仍不变。
+
+详见 `reports/ic03b_remaining_smoke_acceptance.md`。上面的 prepare/run 命令现为不可重跑的历史命令。下一步只进入 IC04 请求冻结与人工审查，formal_training_authorized/training_ready 仍 false；不得把未训练 smoke 到达率视为课程收益。
