@@ -170,3 +170,9 @@ IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分
 [CM3](https://arxiv.org/abs/1809.05188) 将单体目标学习与多体合作分阶段处理；[Curriculum RL via Constrained Optimal Transport](https://proceedings.mlr.press/v162/klink22a.html) 从任务分布之间的插值与约束运输构造课程。这些是课程与交互学习的研究基础，不是本方案三层规则、固定比例或单体 DDPG 对比的验证证据。
 
 本轮潜在贡献是：以**可辨识且任务相关的邻车响应差异**组织任务，并检验课程是否提高动作条件信息的利用效率。不能仅以“采用课程学习”宣称新颖，也不能以 B3-Curriculum 独自提高就声称动作条件特异性；须由四组匹配对照及机制证据支持。
+
+## 12. IC02h：用户选择新的交互强度研究定义
+
+用户在审阅 IC02g 之后明确提出 L/M/H 三个互斥交互强度层，并批准开始实现。新研究不再以低控制难度作为首层要求；旧 C0/C1/C2 规则、1/11/20 结果及覆盖失败均保持不变，不描述为被修复或通过。
+
+新的独立设计见 `docs/design/interaction_intensity_curriculum_v1.md`，配置为 `configs/development/ic02h_interaction_intensity_v1.json`。固定调度改为 0–20k 的 60/30/10、20–60k 的 20/20/60、60–120k 的有限池 target；D 仅作独立描述。已有源码新增纯离线分层、独立 RNG 回合边界采样与 replay 曝光审计核心，尚未接入持久 DDPG learner 或提供课程训练命令。下一项工程接入与真实 smoke 仍须先通过阶段验收；不从提案 coverage 自动获得训练授权。
