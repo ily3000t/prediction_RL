@@ -145,7 +145,8 @@ G = (R_B3,Curr - R_B2,Curr) - (R_B3,Mix - R_B2,Mix)
 | IC02a，离线核查完成 | 14 项源码假设及 source-episode 映射；见 `reports/ic02a_entry_design_acceptance.md` | 129 项测试通过；不改 reset、不晋升 task 层；入口提案未批准 |
 | IC02b，封存轨迹一致性已复核，完整 postflight 未恢复 | fresh Gym20 worker 入口及实际 12 回合/144 控制步 smoke，零新增仿真的独立复核 | 328 项离线测试；12 项精确 parity 通过；原失败保留，最终内存 tensor/RNG 证据缺失；不替代 task 覆盖 |
 | IC02c，离线任务刻画设计已完成 | 旧 root/真实 reset 缺口、32-task 固定提案及三任务工程预算；见 `reports/ic02c_task_design_acceptance.md` | 360 项离线测试；0 新会话/分支/训练；collector、任务规则/pi 及新采集授权未通过 |
-| IC02d，三任务工程通过，完整任务池未通过 | 旧零执行失败保留；获准修复版三任务/九 root/90 分叉完成；见 `reports/ic02d_engineering_v2_acceptance.md` | 413 项离线测试；114 会话/4,186 控制步/15,700 raw ticks；恢复与收尾通过；其余 29 task、分层/pi 和训练未放行 |
+| IC02d，三任务工程通过 | 旧零执行失败保留；获准修复版三任务/九 root/90 分叉完成；见 `reports/ic02d_engineering_v2_acceptance.md` | 413 项离线测试；114 会话/4,186 控制步/15,700 raw ticks；该阶段授权仅含三任务，不替代完整池或分层/pi |
+| IC02e，32-task 覆盖采集通过，分层未冻结 | 新增 29 项并只读复用原三项，96 roots/960 分叉独立复核通过；见 `reports/ic02e_pilot_acceptance.md` | 432 项测试；全池实际 1,216 会话/51,296 控制步/174,112 ticks；26/32 approach 截尾；classifier/pi=null，训练不放行 |
 | IC03，待实现 | 独立 RNG 固定调度、Mix 配额、外部 replay 审计与单元测试 | 不截断 episode，不修改优化器/回放/网络；真实分布可追溯 |
 | IC04，待实现 | task/阈值/pi 冻结、短工程 smoke、四组用户运行请求 | 所有未定字段已明确；用户确认后才提供可执行训练请求 |
 | IC05，用户运行后 | 全 seed、固定终点聚合与机制诊断 | 负结果正常完成；不换 seed、改阈值、加预算或扩模型 |
@@ -155,6 +156,8 @@ IC02a 已完成纯离线源码/映射核查，报告在 `artifacts/ic/ic02a_v1/r
 IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分类、不可执行的 32-task 提案，当时 reset 尚无候选 I。详细定义与全 replay 成本见 `docs/design/curriculum_task_characterization_v1.md`；后续采集授权分别记录，不修改该历史配置为可执行。
 
 后续用户批准 IC02d 三任务范围。首次请求在 SUMO 启动前因 `s*.json` 误匹配 `started.json` 失败，0 仿真消耗；旧 failure 保留。用户随后批准相同种子与上限的独立修复版 `ic02d_eng_v2`，三任务工程完成：reset/early_ramp 的 I 均为 0，approach 均非零；一个 approach 原生终止截尾。此结果不能将初态无响应直接等同 C0，尚不提供完整 task 层覆盖。其余 29-task pilot 仍需单独批准，classifier/pi=null，课程训练不放行。
+
+用户随后单独批准剩余 29-task 的明确预算，IC02e 已完成。全 32-task pilot 的 reset/early_ramp 均无邻车响应，approach 均非零，但 26 项时域截尾且关键车辆数与完整时域相关。下一步先针对现有数据做共同时窗/角色集合及 D 的离线可比性核查，再提出任务规则与显式有限池目标；不直接套旧 root 阈值，不覆盖原指标，不自动启动课程训练。
 
 ## 11. 相关研究与贡献界限
 

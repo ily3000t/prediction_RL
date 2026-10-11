@@ -1,5 +1,9 @@
 # IC02e：剩余 29 个训练侧任务刻画
 
+## 当前状态：已完成，以下命令仅保留历史
+
+`ic02e_pilot_v1` 已完成且不可再次 prepare/run：新增 29 任务、1,102 会话、47,110 控制步、158,412 ticks、87 roots、870 分叉；原三任务只读复用。全部 32 项独立复核通过。详见 `reports/ic02e_pilot_acceptance.md`。分层/pi 未冻结，仍不开放训练。
+
 用户在三任务工程通过后，批准固定剩余 29-task 的命名请求。种子是原步长 8 清单的 11024–11248；已完成的 11000/11008/11016 只读复用，不重跑。原配置和历史报告不改。新授权在 `provenance/ic02e_pilot_authorization.json`，独立无嵌套配置为 `configs/development/ic02e_remaining_task_pilot_v1.json`。
 
 本阶段不改变科学采集语义，直接调用 IC02d 的 TaskBrancher/collect_task 与 sealed-evidence 验收；核对工程报告、receipt、科学源码及资产。最多 1,102 新会话、118,262 控制步、230,666 raw ticks、87 root 槽位、870 分叉，包含发现、所有前缀重放与等待。单 worker、Torch 单线程，无 B2/B3 推理或训练、无 learner/DDPG，旧项目只读。
