@@ -145,16 +145,16 @@ G = (R_B3,Curr - R_B2,Curr) - (R_B3,Mix - R_B2,Mix)
 | IC02a，离线核查完成 | 14 项源码假设及 source-episode 映射；见 `reports/ic02a_entry_design_acceptance.md` | 129 项测试通过；不改 reset、不晋升 task 层；入口提案未批准 |
 | IC02b，封存轨迹一致性已复核，完整 postflight 未恢复 | fresh Gym20 worker 入口及实际 12 回合/144 控制步 smoke，零新增仿真的独立复核 | 328 项离线测试；12 项精确 parity 通过；原失败保留，最终内存 tensor/RNG 证据缺失；不替代 task 覆盖 |
 | IC02c，离线任务刻画设计已完成 | 旧 root/真实 reset 缺口、32-task 固定提案及三任务工程预算；见 `reports/ic02c_task_design_acceptance.md` | 360 项离线测试；0 新会话/分支/训练；collector、任务规则/pi 及新采集授权未通过 |
-| IC02d，collector 已实现，runtime 尚未通过 | 获准三任务工程请求首次派发在目录预检失败；修复后未重跑；见 `reports/ic02d_engineering_preflight_failure.md` | 399 项离线测试；实际 0 会话/控制步/分叉；原失败保留，新命名修复版请求待用户确认 |
+| IC02d，三任务工程通过，完整任务池未通过 | 旧零执行失败保留；获准修复版三任务/九 root/90 分叉完成；见 `reports/ic02d_engineering_v2_acceptance.md` | 413 项离线测试；114 会话/4,186 控制步/15,700 raw ticks；恢复与收尾通过；其余 29 task、分层/pi 和训练未放行 |
 | IC03，待实现 | 独立 RNG 固定调度、Mix 配额、外部 replay 审计与单元测试 | 不截断 episode，不修改优化器/回放/网络；真实分布可追溯 |
 | IC04，待实现 | task/阈值/pi 冻结、短工程 smoke、四组用户运行请求 | 所有未定字段已明确；用户确认后才提供可执行训练请求 |
 | IC05，用户运行后 | 全 seed、固定终点聚合与机制诊断 | 负结果正常完成；不换 seed、改阈值、加预算或扩模型 |
 
 IC02a 已完成纯离线源码/映射核查，报告在 `artifacts/ic/ic02a_v1/report.json`。用户已批准的 IC02b 预算已消耗；原 `artifacts/ic/ic02b_v1/failure.json` 不覆盖，独立 `artifacts/ic/ic02b_review_v1/report.json` 只确认封存轨迹 parity，不恢复未采集的最终 postflight。当前不启动调度或课程训练，也不重跑 smoke。若需要新场景分支采集，另提交明确版本、预算、参考控制责任及分层规则，取得用户批准。fresh-task target 不能宣称等同旧 continuous-traffic 分布；不提供尚不存在的课程训练 CLI，也不重复运行旧 120k 请求冒充课程实验。
 
-IC02c 已实际保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分类、不可执行的 32-task 提案。三个 reset 当前状态不能提供候选 I；下一批准点是三任务参考刻画工程阶段，最多 114 个新会话/12,234 控制步/23,862 raw tick。详细定义与全 replay 成本见 `docs/design/curriculum_task_characterization_v1.md`；这仍不批准新采集或课程训练。
+IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分类、不可执行的 32-task 提案，当时 reset 尚无候选 I。详细定义与全 replay 成本见 `docs/design/curriculum_task_characterization_v1.md`；后续采集授权分别记录，不修改该历史配置为可执行。
 
-后续用户已明确批准 IC02d 三任务范围，独立 collector 已实现。首次请求在 SUMO 启动前因 `s*.json` 误匹配 `started.json` 失败，0 仿真消耗；修复已通过离线回归，但原 failed 请求不自动重跑。新命名修复版请求需确认，尚无新的 task D/I 或层覆盖结果；其余 29-task pilot 和课程训练继续不放行。
+后续用户批准 IC02d 三任务范围。首次请求在 SUMO 启动前因 `s*.json` 误匹配 `started.json` 失败，0 仿真消耗；旧 failure 保留。用户随后批准相同种子与上限的独立修复版 `ic02d_eng_v2`，三任务工程完成：reset/early_ramp 的 I 均为 0，approach 均非零；一个 approach 原生终止截尾。此结果不能将初态无响应直接等同 C0，尚不提供完整 task 层覆盖。其余 29-task pilot 仍需单独批准，classifier/pi=null，课程训练不放行。
 
 ## 11. 相关研究与贡献界限
 
