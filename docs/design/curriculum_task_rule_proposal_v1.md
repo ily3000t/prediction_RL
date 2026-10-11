@@ -69,3 +69,7 @@ python -B tools/propose_curriculum_task_rules.py run --request artifacts/ic/ic02
 ```
 
 运行后检查工程完整性、候选层计数、条件交集及采样可执行性。负覆盖也应 status=complete，而不是删 seed 或调阈值重跑。真正的分层冻结、正式 manifest、调度器、SUMO smoke 和训练均不在此次授权内。
+
+## 实际检查结果
+
+本初稿已在干净实现 commit `15ef568…` 完成一次离线检查，508 项测试通过。候选层为 C0=1、C1=11、C2=20，工程 gate=true，但 C0 未达每层 10 项覆盖，coverage_gate=false。所有 source/输入/RNG 验证通过，0 新仿真/推理/训练；没有正式标签或分布冻结。不得改本版本规则重算成通过。具体数值、产物哈希及需用户选择的后续方向见 `reports/ic02g_task_rule_proposal_acceptance.md`。
