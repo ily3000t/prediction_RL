@@ -198,3 +198,11 @@ IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分
 新请求 `ic03b_remaining_v1` 已实际完成六原生回合，1,147 控制步/1,753 ticks/1,147 特征调用，三个完整收据、来源 postflight 与独立 raw/replay 验收通过。旧加新总消耗八会话、1,282 控制步、2,090 ticks、零优化更新。旧 B2-Mix 有独立只读取证但不是新有效收据；旧请求依旧 failed，原收据依旧无效，不覆盖历史失败。
 
 最新结论是四路径真实接入证据齐备，可以进入 IC04 正式请求冻结与人工审查；**正式训练仍未实现/启动或获准，training_ready=false**。详见 `reports/ic03b_remaining_smoke_acceptance.md`。未训练 smoke 的到达/碰撞不能当作课程或 B3 效果，不自动进入 120k、扩预算或增加实验。
+
+## 16. IC04：四组用户运行工作流
+
+最新实现采用独立 `ic04_matched_120k_v1.json`、新 live task manifest 和用户确认请求哈希。研究定义/32-task/阈值/有限池 target/固定调度均不改变；12 个从头训练实例、1.44M 请求步及 960 个 Gym20 开发评价回合已形成完整编排。主终点 120k，无最佳节点选择，无 author50/新泛化/预测器训练或预算扩展。
+
+旧科学模块、offline/smoke guards 和历史报告保持不变。新的工具层 typed adapter 单独授权 IC04，继承已验证的任务生命周期、原 store/sample/episode 逻辑；未通过重命名 offline purpose、改旧 gate 或缩短 warmup 开放训练。各任务共享持久 learner、optimizer、target 和原 replay，元数据仍不进入策略输入。记录实际 reset 阶段、采集/存量/真实 minibatch 曝光，并按训练 seed 与场景配对聚合 G 和固定节点近似 AUC；负效果正常完成。
+
+交接命令和限制见 `docs/runbooks/ic04_matched_120k_v1.md`。源码/合成测试验收不等于已完成 120k 学习实验；真实训练与新增开发评价仅由用户按冻结请求启动，旧章节保持历史状态。额外模型信息利用诊断留在 IC05，不默认增加闭环特征消融或寻找新的有利场景。

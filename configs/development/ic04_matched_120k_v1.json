@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "protocol_id": "ic04_user_run_interaction_intensity_matched_120k_v1",
+  "scope": "matched_development_not_independent_test",
+  "run_id": "ic04_train_v1",
+  "arms": [
+    "b2_mix",
+    "b2_curriculum",
+    "b3_mix",
+    "b3_curriculum"
+  ],
+  "task_seeds": [
+    11000,
+    11008,
+    11016,
+    11024,
+    11032,
+    11040,
+    11048,
+    11056,
+    11064,
+    11072,
+    11080,
+    11088,
+    11096,
+    11104,
+    11112,
+    11120,
+    11128,
+    11136,
+    11144,
+    11152,
+    11160,
+    11168,
+    11176,
+    11184,
+    11192,
+    11200,
+    11208,
+    11216,
+    11224,
+    11232,
+    11240,
+    11248
+  ],
+  "classification": "frozen_train_only_reference_conditioned_L_M_H",
+  "thresholds": {
+    "I_low": 0.3976121680515756,
+    "I_high": 2.6839018875244487,
+    "repeat_noise_floor": 0.0,
+    "complete_source_support": true,
+    "separated_terciles": true
+  },
+  "layer_counts": {
+    "L": 11,
+    "M": 10,
+    "H": 11
+  },
+  "target_task_weight": "uniform_1_over_32",
+  "schedule": {
+    "stages": [
+      {
+        "start": 0,
+        "end": 20000,
+        "mass": {
+          "L": 0.6,
+          "M": 0.3,
+          "H": 0.1
+        }
+      },
+      {
+        "start": 20000,
+        "end": 60000,
+        "mass": {
+          "L": 0.2,
+          "M": 0.2,
+          "H": 0.6
+        }
+      },
+      {
+        "start": 60000,
+        "end": 120000,
+        "mass": {
+          "L": 0.34375,
+          "M": 0.3125,
+          "H": 0.34375
+        }
+      }
+    ],
+    "nominal_Mix_reset_mass": {
+      "L": 0.3385416666666667,
+      "M": 0.27291666666666664,
+      "H": 0.3885416666666667
+    },
+    "within_level_sampling": "uniform_task",
+    "actual_exposure_equality_claim": false
+  },
+  "entry_contract": "seeded_fresh_gym20_task_v1",
+  "execution_contract": "simulation_blocking_exact_v1",
+  "reference_prefix_steps": 0,
+  "training": {
+    "run_seeds": [
+      0,
+      1,
+      2
+    ],
+    "sampler_seeds": [
+      17003,
+      17004,
+      17005
+    ],
+    "requested_frames": 120000,
+    "checkpoint_frames": [
+      20000,
+      40000,
+      60000,
+      120000
+    ],
+    "workers": 1,
+    "torch_threads": 1,
+    "device": "cpu",
+    "learning_rate": 0.0002,
+    "replay_start_size": 5000,
+    "minibatch_size": 100,
+    "replay_buffer_size": 1000000,
+    "native_control_cap": 500,
+    "from_scratch": true,
+    "snapshot_rule": "first_complete_episode_boundary_at_or_after_requested_node",
+    "resume_weights_only": false,
+    "clear_replay_at_stage_change": false
+  },
+  "evaluation": {
+    "simulator_seeds": [
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219
+    ],
+    "workers": 2,
+    "torch_threads": 1,
+    "deterministic": true,
+    "episodes_per_scene": 1,
+    "driver": "gym20_fresh_process_first_episode",
+    "native_control_cap": 500
+  },
+  "main_endpoint": 120000,
+  "selection": "no_best_node_selection",
+  "comparisons": [
+    {
+      "id": "curriculum_on_B2",
+      "left": "b2_mix",
+      "right": "b2_curriculum"
+    },
+    {
+      "id": "curriculum_on_B3",
+      "left": "b3_mix",
+      "right": "b3_curriculum"
+    },
+    {
+      "id": "conditioning_in_Mix",
+      "left": "b2_mix",
+      "right": "b3_mix"
+    },
+    {
+      "id": "conditioning_in_Curriculum",
+      "left": "b2_curriculum",
+      "right": "b3_curriculum"
+    }
+  ],
+  "specificity": "(B3_Curr-B2_Curr)-(B3_Mix-B2_Mix)",
+  "auc": "node_trapezoid_20000_to_120000_divided_by_100000_not_continuous_measurement",
+  "metadata_in_network_inputs": false,
+  "predictor_training": false,
+  "online_true_counterfactual_branches": false,
+  "reward_or_action_changes": false,
+  "automatic_budget_extension": false,
+  "resume_incomplete_job": false,
+  "test_opened": false,
+  "author50": false,
+  "formal_claim": false
+}
