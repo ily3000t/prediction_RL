@@ -182,3 +182,11 @@ IC02c 保存纯离线报告 `artifacts/ic/ic02c_design_v1/report.json` 及未分
 最新接入设计见 `docs/design/curriculum_persistent_integration_v1.md`。新增任务流封装和真实 replay tuple/minibatch 外部观察器；保留原 ALL episode/update loop，同一 learner 跨单回合 worker 存续，终止 store 后才允许切换。22 项新增测试与全项目 1,240 项离线回归通过，冻结资产与旧报告不变。
 
 目前只有 offline integration purpose、合成 worker 测试与下一项明确预算提案；真实 SUMO smoke、live task manifest 和正式训练 CLI 仍未执行/发布。旧 IC02h 记录中的“尚未接入”描述的是该阶段历史状态，不覆盖为已通过真实闭环验收。下一项拟四条路径各两个原生回合、最多 8 会话/4,000 控制步、零 optimizer 更新，需要独立冻结请求并取得用户确认。
+
+## 14. IC03b：首组真实接入完成，完整收据验收失败
+
+用户在上述明确八会话/4,000 控制步/零优化更新提案后批准继续；独立配置与授权已形成并执行。首组 B2-Mix 完成两个原生回合，实际两个会话/135 控制步/337 ticks/135 特征调用，原奖励、执行与 replay 等子进程检查通过。父进程因 child 封存日志后再输出完成提示而发现收据哈希变化，原失败保留；其余三组未启动。未训练策略碰撞为正常结果，不作为工程 gate。
+
+修复提交 `5cd69c1edf2e14b0f5d3782879a99fe59e24b73a` 将封存移至父进程，在 child 退出及日志关闭后执行，并保留所有文件的严格哈希校验。新增两项收尾/失败禁止重试回归，全项目离线 1,276 passed。详细证据与字节哈希见 `reports/ic03b_smoke_failure_review.md`。
+
+**最新状态：完整真实 smoke 尚未通过，training_ready=false。** 不重跑或修补旧请求，不启动 IC04/formal。若用户批准，另行实现剩余三组最多六个回合的修复版请求，记录此前已消耗的两个回合；不自动扩大为又八个回合。旧章节中的状态保留为历史，不将离线测试通过写成四组真实验收通过。

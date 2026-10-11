@@ -22,3 +22,9 @@ python -B tools/smoke_persistent_curriculum.py run --request artifacts/ic/ic03b_
 只允许固定新 run ID；不可覆盖，无自动 retry、无 incomplete resume。失败时保留 parent/worker failure、日志和已消耗预算，停止。不能修改代码后使用相同请求重跑；任何修复版运行必须另行记录未完成原因并获准剩余预算，不能自动再获得八个回合。
 
 输出为 `artifacts/ic/ic03b_smoke_v1/`：request/preparation/started、逐 arm 的环境与 native/replay 日志、原生回合 summary、不可变 complete 收据、最终 report 或 failure。工程通过后仍不启动四组×三个 seed×120k；IC04 请求冻结与人工批准是独立下一步。
+
+## 2026-10-11 实际运行状态：收尾失败，勿重跑
+
+原请求在首组 B2-Mix 的两个原生回合完成后，因 child 提前封存 worker.log、随后打印完成提示而被父 verify 拒绝。实际消耗为两个会话、135 控制步、337 raw ticks、135 特征调用、零 optimizer 更新；剩余三组未启动。原 failure/错误 receipt 全部保留，不将未训练策略的两次碰撞视作工程失败。
+
+修复已改为成功 child 退出与 stdout 关闭之后由父进程封存，1,276 项离线测试通过；但修复版真实 smoke 尚未执行。原 prepare/run 命令现已是历史命令，不能通过删除产物重跑。详见 `reports/ic03b_smoke_failure_review.md`。下一次需明确批准剩余三组、最多六回合的独立版本；当前尚无该请求或执行命令。
