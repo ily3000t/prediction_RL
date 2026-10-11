@@ -1,0 +1,27 @@
+{
+  "version": "ic02e-human-authorization-v1",
+  "recorded_on": "2026-10-11",
+  "authorization_source": "User replied 继续 after explicit approval question for remaining 29 tasks with caps 1102 sessions, 118262 controls, 230666 raw ticks and 870 branches; no training. Reuse the three completed engineering tasks without rerunning them.",
+  "protocol_id": "ic02e-remaining-task-pilot-v1",
+  "run_id": "ic02e_pilot_v1",
+  "simulator_seeds": [11024,11032,11040,11048,11056,11064,11072,11080,11088,11096,11104,11112,11120,11128,11136,11144,11152,11160,11168,11176,11184,11192,11200,11208,11216,11224,11232,11240,11248],
+  "maximum_tasks": 29,
+  "maximum_fresh_sumo_sessions": 1102,
+  "maximum_control_steps": 118262,
+  "maximum_raw_ticks": 230666,
+  "maximum_candidate_branches": 870,
+  "reuse_completed_engineering_tasks_without_rerun": true,
+  "remaining_29_pilot_tasks_authorized": true,
+  "predictor_inference_authorized": false,
+  "predictor_training_authorized": false,
+  "ddpg_training_authorized": false,
+  "task_layer_assignment_authorized": false,
+  "merge_main_authorized": false,
+  "push_authorized": false,
+  "old_baseline_access": "read_only",
+  "engineering_hashes": {
+    "request.json": "306f65b90d8562757f462bce9ccfab07ce2c1d9da8cf064ee543ff6ac885003a",
+    "report.json": "d4a57833d741869a8351062ec56a0906caf7b19e075d64569654e289ab56009c",
+    "postflight.json": "2cdb2d1d2553ae02ada7f2a5f4e6dd4aded632468b625bf2f0a6be3b0fbc70cd"
+  }
+}
