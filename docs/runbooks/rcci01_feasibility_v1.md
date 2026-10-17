@@ -5,6 +5,10 @@
 配置：configs/development/rcci01_feasibility_v1.json。
 契约与范围：docs/design/rcci01_feasibility_contract_v1.md。
 
+2026-10-17 已完成 rcci01_bnd_v2 与 rcci01_full_v1；不要重复这些 run ID。
+实际结果及限制见 [验收记录](../../reports/rcci01_feasibility_acceptance_20261017.md)。
+下方命令说明完整流程，不代表还需要再跑一次已完成审计。
+
 ## 有界开发审计
 
 工作树须干净，run ID 不存在时才运行：
