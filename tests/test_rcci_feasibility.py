@@ -11,6 +11,7 @@ sys.path[:0]=[str(ROOT/'src'),str(ROOT/'tools')]
 from prediction_rl.evaluation.rcci_feasibility import (
     AuditMap, AuditAccumulator, CONTRACT, audit_branch, summarize, distribution)
 import audit_rcci_feasibility as cli
+import prediction_rl.data.frozen_dataset as frozen
 
 
 @pytest.fixture
@@ -137,3 +138,13 @@ def test_missing_or_nonfinite_geometry_is_not_legitimate_mask(geometry):
     with pytest.raises(ValueError):geometry.audit_frame(f)
     f=frame(geometry);f['vehicles']['ego']['heading_rad']=float('nan')
     with pytest.raises(ValueError):geometry.audit_frame(f)
+
+
+def test_worktree_map_accepts_only_git_line_endings_not_semantic_changes(tmp_path,monkeypatch):
+    baseline=tmp_path/'base';work=tmp_path/'work';baseline.mkdir();work.mkdir()
+    (baseline/'map.xml').write_bytes(b'<map/>\r\n');(work/'map.xml').write_bytes(b'<map/>\n')
+    monkeypatch.setattr(cli,'ROOT',work)
+    monkeypatch.setattr(frozen.subprocess,'check_output',lambda *a,**k:b'<map/>\n')
+    assert cli.verify_map_identity(baseline,'map.xml')==cli.sha(work/'map.xml')
+    (work/'map.xml').write_bytes(b'<map changed="yes"/>\n')
+    with pytest.raises(ValueError):cli.verify_map_identity(baseline,'map.xml')

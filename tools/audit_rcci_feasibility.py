@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 from prediction_rl.data.collection_store import read_json as read, file_hash as sha, write_once, run_lock
 from prediction_rl.data.dataset_contract import digest, build_branch_labels
-from prediction_rl.data.frozen_dataset import inside
+from prediction_rl.data.frozen_dataset import inside, verify_historical_text_checkout
 from prediction_rl.prediction.interface import PredictorConfig
 from prediction_rl.prediction.supervision import align_supervision
 from prediction_rl.evaluation.rcci_feasibility import VERSION, CONTRACT, AuditMap, AuditAccumulator, audit_branch, summarize
@@ -58,6 +58,15 @@ def select_roots(review, scope):
     return rows
 
 
+def verify_map_identity(baseline, relative):
+    # Bind BOTH checkouts to the exact base Git blob. Permit Git LF/CRLF only,
+    # never XML reserialization, changed whitespace/attributes or changed maps.
+    recorded=sha(inside(baseline,relative))
+    verify_historical_text_checkout(baseline,relative,recorded,BASE)
+    verify_historical_text_checkout(ROOT,relative,recorded,BASE)
+    return sha(ROOT/relative)
+
+
 def inputs(baseline, config, scope):
     baseline = Path(baseline).resolve()
     if baseline == ROOT.resolve() or baseline.is_relative_to(ROOT.resolve()) or ROOT.resolve().is_relative_to(baseline):
@@ -81,8 +90,7 @@ def inputs(baseline, config, scope):
     def record(relative):
         p = inside(baseline,relative); hashes[p.relative_to(baseline).as_posix()] = sha(p)
     for key in ('dataset_review','collection_request','predictor_request','network'): record(config[key])
-    if sha(inside(baseline,config['network'])) != sha(ROOT/config['network']):
-        raise ValueError('Worktree and baseline maps differ')
+    verify_map_identity(baseline,config['network'])
     for name,expected in PREDICTORS.items():
         asset=f'artifacts/training/predictor_v1/{name}_ensemble.pt'; record(asset)
         if hashes[asset] != expected: raise ValueError('Frozen predictor checksum changed')
@@ -121,6 +129,7 @@ def prepare(args):
        'config_sha256':sha(cp),'baseline_root':str(Path(args.baseline_root).resolve()),'baseline_commit':BASE,
        'scope':args.scope,'roots':selected,'input_hashes':hashes,'source_hashes':sources(),
        'environment':environment(),'manifest_hash':digest(review['manifest']),
+       'worktree_map_sha256':sha(ROOT/config['network']),
        'execution_contract':'offline_readonly_metadata_audit_v1','optimizer_seed':None,
        'future_lane_ids':'offline_labels_only_not_online_projection_inputs'}
     write_once(out/'request.json',q)
@@ -134,7 +143,8 @@ def run(path, expected):
     clean(); path=inside(ROOT,path); q=read(path); root=path.parent
     if (path.parent.parent!=ROOT/'artifacts/rcci01' or q['version']!=VERSION or digest(q)!=expected
             or read(root/'preparation.json')['request_hash']!=expected or q['source_hashes']!=sources()
-            or q['environment']!=environment() or sha(inside(ROOT,q['config_path']))!=q['config_sha256']):
+            or q['environment']!=environment() or sha(inside(ROOT,q['config_path']))!=q['config_sha256']
+            or q['worktree_map_sha256']!=sha(ROOT/q['config']['network'])):
         raise ValueError('Request/source/config/environment changed')
     selected,review,hashes=inputs(q['baseline_root'],q['config'],q['scope'])
     if selected!=q['roots'] or hashes!=q['input_hashes'] or digest(review['manifest'])!=q['manifest_hash']:

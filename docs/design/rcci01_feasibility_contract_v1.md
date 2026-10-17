@@ -53,6 +53,9 @@ c0–c4 文件哈希、root/split/episode/time/ID 对齐及原始轨迹与标签
 扫描不相关 split 的整目录 inventory。receipt 中未使用文件不读取。
 两个 ensemble 只核验固定 SHA；不加载权重、不执行推理，不假称 runtime
 兼容验收。新产物只写本工作树 artifacts/rcci01/，短 ID、不可覆盖。
+基线和本工作树的 XML 分别严格绑定 75051acc 的 Git blob，仅允许 LF/CRLF
+检出差异，不允许 XML 重序列化或语义/空白变更；请求另外记录当前工作树
+地图字节 SHA。此检查不改写旧请求哈希或降低任何历史 guard。
 
 ## 几何与缺失语义
 
