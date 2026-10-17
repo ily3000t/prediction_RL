@@ -1,5 +1,9 @@
 # RCCI v2：保存预测上的零前向重算
 
+2026-10-17 已完成 `rcci02_v2_bnd_v1`；不要重复该 run ID。
+实际结果与限制见 [验收记录](../../reports/rcci02_v2_cached_acceptance_20261017.md)。
+以下命令保留流程说明，不意味着应再次运行或直接进入训练。
+
 工作目录 `E:/Prediction_RL_RCCI`，Python 使用 pytorch 环境。
 契约先于实现与重算冻结于 `1daa643`：
 [v2 定义](../design/rcci02_adapter_contract_v2.md)。
