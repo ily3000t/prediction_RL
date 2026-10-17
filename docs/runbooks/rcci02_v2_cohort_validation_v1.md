@@ -3,6 +3,17 @@
 这一步不是训练，也不运行 SUMO。它复用已有两个三成员预测器，检查固定 RCCI v2
 在全部既有 train/validation 数据上的支持、误差与机制局限。负结果也正常完成。
 
+2026-10-17 已在实现提交 `2a4563c` 上准备 `rcci02_v2_full_v1`，并通过运行前身份守卫。
+尚未启动完整推理；不要再次 prepare 同一 ID。现在可直接由用户执行：
+
+```powershell
+cd E:\Prediction_RL_RCCI
+python -B tools/validate_rcci_v2_cohort.py run --request artifacts/rcci02_v2_cohort/rcci02_v2_full_v1/request.json --confirm-request-hash 68b9f264739f07fd77df81cb2315eea7f058b542d184cf4d5db798a45e47ec59
+```
+
+实际开发验收见 [准备记录](../../reports/rcci02_v2_cohort_preparation_20261017.md)。
+下方通用 prepare 流程仅供以后明确批准的新请求参考。
+
 ## 已冻结范围
 
 - 配置：`configs/development/rcci02_v2_cohort_validation_v1.json`，无 extends。
