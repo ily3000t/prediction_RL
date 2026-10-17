@@ -1,5 +1,9 @@
 # RCCI02 倒退与字段支持诊断 v1
 
+2026-10-17 已完成 `rcci02_diag_v1`，不要重复该 run ID。
+实际证据与决策见 [验收记录](../../reports/rcci02_reversal_diagnostics_acceptance_20261017.md)。
+已保存的 forecasts 可以只读重算，不需要再启动模型或训练。
+
 工作目录 `E:/Prediction_RL_RCCI`；使用 pytorch Python。
 配置 `configs/development/rcci02_reversal_diagnostics_v1.json`，无 extends。
 只诊断既有六根 pilot，不扩大场景、不更换 seeds/预测器、不改接口或阈值。
