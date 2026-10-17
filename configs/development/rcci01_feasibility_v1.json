@@ -1,0 +1,21 @@
+{
+  "version": "rcci01_data_geometry_audit_v1",
+  "purpose": "offline_feasibility_not_method_effect",
+  "splits": ["train", "validation"],
+  "bounded_roots_per_split": 3,
+  "selection": "frozen_review_order_no_outcome_filter",
+  "dataset_review": "artifacts/data_reviews/response_v1_review/review.json",
+  "dataset_review_sha256": "0f59c02cb6daa075e65ab0c7461ca5ff5ca1bfb7f13af9d41ef85ae57632d312",
+  "collection_request": "artifacts/data/response_v1/request.json",
+  "predictor_request": "artifacts/training/predictor_v1/request.json",
+  "network": "RL-MPC-LaneMerging-master/merge.net.xml",
+  "candidate_ids": [0, 1, 2, 3, 4],
+  "horizon_steps": 25,
+  "tick_s": 0.2,
+  "diagnostic_distance_bins_m": [0.001, 0.05, 0.25, 1.0, 2.0, 5.0],
+  "projection_acceptance_threshold": null,
+  "predictor_inference": false,
+  "simulation": false,
+  "training": false,
+  "online_adapter_released": false
+}
