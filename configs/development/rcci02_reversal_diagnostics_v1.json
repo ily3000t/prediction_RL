@@ -1,0 +1,17 @@
+{
+  "version": "rcci02_reversal_and_field_diagnostics_v1",
+  "parent_request": "artifacts/rcci02/rcci02_bnd_v1/request.json",
+  "parent_request_hash": "02d6730a98e3a3a1a3a3065fb9a2d66ff49967ceed10addd3d40a608313d3166",
+  "parent_report_sha256": "6c5f8f9ba0b35089d4996fc3b5fdbf487cdbc65398fb4c0685730e1bb22415a4",
+  "parent_roots_sha256": "f30cc77926e44d82648e8c227e4fe8306a5e86f86f4dcee909c3f7f938244741",
+  "scope": "same_six_roots_no_expansion",
+  "splits": ["train", "validation"],
+  "torch_threads": 1,
+  "max_model_forward_calls": 12,
+  "save_mean_forecasts": true,
+  "change_adapter_or_thresholds": false,
+  "training": false,
+  "simulation": false,
+  "calibration_access": false,
+  "test_access": false
+}
