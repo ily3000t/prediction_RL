@@ -1,5 +1,9 @@
 # RCCI02 冻结预测器：六根有界离线审计
 
+2026-10-17 已完成 `rcci02_bnd_v1`，不要重复该 run ID。
+实际结果及停止点见 [验收记录](../../reports/rcci02_frozen_audit_acceptance_20261017.md)。
+下方保留完整流程说明，不表示应立即再次运行或进入训练。
+
 工作目录 `E:/Prediction_RL_RCCI`，只读基线 `E:/Prediction_RL`。
 配置 `configs/development/rcci02_frozen_audit_v1.json`，独立可读，无 extends。
 本次入口只允许固定 train/validation 前三根，各根保留五候选；不支持 full、
