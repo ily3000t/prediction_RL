@@ -1,0 +1,20 @@
+{
+  "version": "rcci02_frozen_predictor_bounded_audit_v1",
+  "splits": ["train", "validation"],
+  "roots_per_split": 3,
+  "cohort": "frozen_review_prefix_no_outcome_filter",
+  "scope": "bounded_only",
+  "training_report": "artifacts/training/predictor_v1/invocations/648e96637f5e/report.json",
+  "prior_report": "artifacts/rcci01/rcci01_full_v1/report.json",
+  "prior_report_sha256": "47665549cb455cd214a878aa8cae8985cbcb82c5aebf47bc401c59421d623fe3",
+  "methods": ["ordinary", "conditional"],
+  "torch_threads": 1,
+  "simulation": false,
+  "training": false,
+  "calibration_access": false,
+  "test_access": false,
+  "online_release": false,
+  "comparison": "same_observed_prefix_and_joint_projection_support",
+  "counterfactual_sensitivity": "repeat_zero_jerk_neighbor_response_keep_all_ego_probes",
+  "numeric_event_tie_s": 1e-8
+}
