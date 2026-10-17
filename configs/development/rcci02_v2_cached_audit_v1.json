@@ -1,0 +1,19 @@
+{
+  "version": "rcci02_v2_cached_prefix_audit_v1",
+  "design_contract": "docs/design/rcci02_adapter_contract_v2.md",
+  "parent_request": "artifacts/rcci02_diag/rcci02_diag_v1/request.json",
+  "parent_request_hash": "597cfcb0f7cea1bf976c8dd36792fb56185a2436af3fc13f21e39e36eafb6d0f",
+  "parent_report_sha256": "213bbd86f043d642418619677bd34a00312748292c6b98b53da04cb52cc64a65",
+  "parent_forecasts_sha256": "0a7a01d9f2df08c108f0e3a65128ead1d61248866b4eee6c0902098feb515128",
+  "parent_diagnostics_sha256": "db98e913cdcbf464f2b27c080d4286e199520fc67e1e76d9a43fba0e572b1616",
+  "scope": "same_six_cached_roots_no_expansion",
+  "splits": ["train", "validation"],
+  "model_weight_loading": false,
+  "model_forward_calls": 0,
+  "simulation": false,
+  "training": false,
+  "calibration_target_access": false,
+  "test_target_access": false,
+  "native_targets_used_for_v2_features": false,
+  "adapter_version": "rcci02_a_supported_prefix_control_volume_v2"
+}
