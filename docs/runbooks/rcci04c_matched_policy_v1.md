@@ -1,7 +1,9 @@
 # RCCI04c：手动运行匹配实验
 
-入口已通过有界检查，见 `reports/rcci04c_entry_acceptance_20261018.md`。
-以下是实际已实现命令。正式训练/长评价尚未启动，由用户逐步运行。
+入口已通过有界检查。原 `matched_v1` 随后在首次定期保存时因审计hook不可序列化失败；
+修复与重新验收见 `reports/rcci04c_periodic_checkpoint_fix_20261018.md`。
+以下命令已切换到修复版新请求；新请求的正式训练/长评价尚未启动，由用户逐步运行。
+旧请求、失败日志及半成品原样保留，不要再运行旧hash，也不要删除旧目录后重试。
 
 ## 配置与成本
 
@@ -16,16 +18,19 @@
 
 ## 已准备的请求
 
-本轮已准备 `artifacts/rcci04c/matched_v1/request.json`，不要重复prepare同目录。
-请求hash：`8dfa87d77539dd7e6167127aa8a0299b8cd1a680bc62b979f58fec6f0b076b20`。
+已准备 `artifacts/rcci04c/matched_savefix_v1/request.json`，不要重复prepare同目录。
+请求hash：`54b81be7a8ebc5e80df3d139949a5fd621d1b2c04aa48a11661c75d441f87f3d`。
 preparation应为`prepared_not_trained`、`full_training_started=false`。
+与旧请求相比，protocol、preset、配置、数据/预测器、Raw权重及评价场景全部不变，
+仅实现来源与入口验收更新。旧失败job没有完整snapshot/优化器与replay可恢复契约，
+新请求仍按既定六实例从头训练，不从旧日志中的`policy.pt`或`q.pt`继续。
 
 使用pytorch环境，进入工作树并设置PowerShell任务变量：
 
 ```powershell
 Set-Location E:\Prediction_RL_RCCI
-$rcciRequest = 'artifacts/rcci04c/matched_v1/request.json'
-$rcciHash = '8dfa87d77539dd7e6167127aa8a0299b8cd1a680bc62b979f58fec6f0b076b20'
+$rcciRequest = 'artifacts/rcci04c/matched_savefix_v1/request.json'
+$rcciHash = '54b81be7a8ebc5e80df3d139949a5fd621d1b2c04aa48a11661c75d441f87f3d'
 ```
 
 ### 1. 只启动六个新RCCI训练
@@ -55,7 +60,7 @@ python -B tools/train_rcci_matched_ddpg.py aggregate --request $rcciRequest --co
 
 结果：
 
-- `artifacts/rcci04c/matched_v1/aggregate.json`：四组、各seed/节点、配对差值与交互差值。
+- `artifacts/rcci04c/matched_savefix_v1/aggregate.json`：四组、各seed/节点、配对差值与交互差值。
 - `development_curves.json`：冻结策略开发评价曲线；不是独立test或收敛保证。
 - `training_curves.json`：训练episode/loss索引，沿用兼容schema；不是验证奖励。
 - `train/<job>/interface_summary.json`及`n*.interface.json`：访问分布下的prefix/失效/latency。
@@ -70,7 +75,7 @@ python -B tools/train_rcci_matched_ddpg.py aggregate --request $rcciRequest --co
 主终端每job打印开始，详细训练输出在`invocations/<ID>/<job>.log`。另开终端查看：
 
 ```powershell
-$rcciLog = Get-ChildItem artifacts/rcci04c/matched_v1/invocations -Recurse -Filter '*.log' | Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+$rcciLog = Get-ChildItem artifacts/rcci04c/matched_savefix_v1/invocations -Recurse -Filter '*.log' | Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
 Get-Content -LiteralPath $rcciLog -Tail 20 -Wait -Encoding UTF8
 ```
 
@@ -83,10 +88,10 @@ aggregate一次写入，已完成结果不可覆盖。
 仍为只读干净`75051acc`。请求不要求后续文档commit SHA相同，但实际代码等必须精确相同。
 不要在实验运行中修改配置、安装/升级包、重编译binary或切换baseline版本。
 
-如将来确需新请求，必须用新短run ID且先审查，不覆盖matched_v1：
+如将来确需新请求，必须用新短run ID且先审查，不覆盖已存在的请求：
 
 ```powershell
-python -B tools/train_rcci_matched_ddpg.py prepare --baseline-root E:/Prediction_RL --run-id matched_02 --entry-smoke-request artifacts/rcci04c/entry_v2/request.json
+python -B tools/train_rcci_matched_ddpg.py prepare --baseline-root E:/Prediction_RL --run-id matched_02 --entry-smoke-request artifacts/rcci04c/entry_savefix_v1/request.json
 ```
 
 使用那次实际打印的新hash。不要复制旧hash或重跑smoke来挑结果。入口检查不需要重做，
