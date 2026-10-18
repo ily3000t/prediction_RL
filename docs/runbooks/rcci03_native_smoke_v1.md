@@ -1,5 +1,9 @@
 # RCCI03 原生接入 smoke
 
+2026-10-18 已完成 `rcci03_native_v1`，engineering gate=true；不要重复此 run ID。
+实际成本、语义验证及短前缀/计算成本限制见
+[验收报告](../../reports/rcci03_native_acceptance_20261018.md)。以下命令仅保留流程。
+
 仅用于工程语义，不训练、不加载策略、不评价方法效果。
 规范先冻结于 `docs/design/rcci03_native_smoke_v1.md`。
 固定五 arms × 两 replay，最多 10 个 SUMO session、15 episodes、1,800 受控步，
