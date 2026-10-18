@@ -1,0 +1,25 @@
+{
+  "version": "rcci04c_entry_smoke_v1",
+  "purpose": "bounded_engineering_NOT_method_comparison",
+  "arms": ["ordinary", "conditional", "rcci_ordinary", "rcci_conditional"],
+  "training_arms": ["rcci_ordinary", "rcci_conditional"],
+  "reuse_raw_weights": true,
+  "training": {"run_seeds": [0], "checkpoint_frames": [16], "requested_frames": 16,
+    "workers": 1, "device": "cpu", "torch_threads": 1, "learning_rate": 0.0002,
+    "warm_start": false, "replay_start_size": 8, "minibatch_size": 8},
+  "evaluation": {"simulator_seeds": [200], "workers": 1, "episodes_per_seed": 1,
+    "policy": "deterministic_no_exploration", "protocol": "gym20_fresh_process_first_episode"},
+  "checkpoint_rule": "first_completed_episode_at_or_after_requested_node",
+  "selection": "smoke_weights_not_comparable_to_legacy_120k",
+  "reset_contract": "upstream_continuing_traffic_v1",
+  "execution_contract": "simulation_blocking_exact_v1",
+  "event_contract": "raw_ego_participant_and_route_endpoint_v2",
+  "action_saturation_threshold": 4.99, "low_speed_mps": 0.1,
+  "comparisons": [
+    {"id": "b3_interface", "left": "conditional", "right": "rcci_conditional"},
+    {"id": "b2_interface", "left": "ordinary", "right": "rcci_ordinary"},
+    {"id": "raw_conditioning", "left": "ordinary", "right": "conditional"},
+    {"id": "rcci_conditioning", "left": "rcci_ordinary", "right": "rcci_conditional"}],
+  "aggregation": "scene_paired_within_training_seed_then_equal_training_seed_mean",
+  "from_scratch": true, "automatic_budget_extension": false, "formal_claim": false, "test_opened": false
+}
