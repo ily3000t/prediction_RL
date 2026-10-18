@@ -1,0 +1,33 @@
+{
+  "version": "rcci03_bounded_native_smoke_v1",
+  "design_contract": "docs/design/rcci03_native_smoke_v1.md",
+  "parent_request": "artifacts/rcci02_v2_cohort/rcci02_v2_full_v1/request.json",
+  "parent_request_hash": "68b9f264739f07fd77df81cb2315eea7f058b542d184cf4d5db798a45e47ec59",
+  "parent_report_sha256": "efe1c5eede5ad69552adacca3002f066ab93cdec18287161f7a201b88ab821f7",
+  "parent_index_sha256": "4c1552e280ae66f724302241516dd958420d01717a94a63dc6d0034c9e336c92",
+  "native_acceptance": "artifacts/rcci03_build/native_audit_v1/report.json",
+  "native_acceptance_sha256": "afd5bd0fec517d368180a99ac254847d4ff4664ea4535232db8ac00410ee771a",
+  "upstream_config": "RL-MPC-LaneMerging-master/configs/train_default_1.json",
+  "arms": ["baseline", "raw_ordinary", "raw_conditional", "rcci_ordinary", "rcci_conditional"],
+  "replays": [
+    {"id": "stream", "simulator_seed": 0, "jerks": [5.0], "episodes": 2, "step_cap": 160, "require_terminal": true},
+    {"id": "mixed", "simulator_seed": 100, "jerks": [-5.0, -2.5, 0.0, 2.5, 5.0], "episodes": 1, "step_cap": 40, "require_terminal": false}
+  ],
+  "max_sessions": 10,
+  "max_episodes": 15,
+  "max_controlled_steps": 1800,
+  "max_simulation_steps": 3315,
+  "max_ensemble_forward_calls": 1444,
+  "max_member_forward_calls": 4332,
+  "worker_watchdog_s": 600,
+  "cache_observation_indices": [0, 1, 10],
+  "device": "cpu",
+  "torch_threads": 1,
+  "execution_contract": "simulation_blocking_exact_v1",
+  "training": false,
+  "policy_loading": false,
+  "model_updates": false,
+  "formal_evaluation": false,
+  "calibration_access": false,
+  "test_access": false
+}
