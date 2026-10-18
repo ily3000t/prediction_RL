@@ -145,3 +145,15 @@ def test_stale_source_rejected_before_assets(tmp_path,monkeypatch):
     monkeypatch.setattr(cli,'read',lambda *a:q)
     monkeypatch.setattr(cli,'sha',lambda *a:pytest.fail('Assets opened for stale source'))
     with pytest.raises(ValueError): cli.load_request(tmp_path/'artifacts/rcci04c/stale/request.json',cli.digest(q))
+
+
+def test_changed_installed_sources_rejected_before_assets(tmp_path,monkeypatch):
+    monkeypatch.setattr(cli,'ROOT',tmp_path); monkeypatch.setattr(cli.shared,'clean',lambda:None)
+    monkeypatch.setattr(cli.shared,'sources',lambda:{'same':'hash'})
+    monkeypatch.setattr(cli.shared,'environment',lambda:{'env':'same'})
+    monkeypatch.setattr(cli,'installed_sources',lambda:{'agents/ddpg.py':'changed'})
+    q={'protocol':deepcopy(SMOKE),'version':'rcci04c_request_v1','source_hashes':{'same':'hash'},
+       'environment':{'env':'same'},'dependencies':{'agents/ddpg.py':'old'}}
+    monkeypatch.setattr(cli,'read',lambda *a:q)
+    monkeypatch.setattr(cli,'sha',lambda *a:pytest.fail('Assets opened for changed installed algorithm'))
+    with pytest.raises(ValueError): cli.load_request(tmp_path/'artifacts/rcci04c/stale/request.json',cli.digest(q))

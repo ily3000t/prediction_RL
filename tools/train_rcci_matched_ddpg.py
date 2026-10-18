@@ -45,6 +45,12 @@ BRIDGE = 'artifacts/rcci04b/raw_bridge_v1'
 BRIDGE_REPORT_SHA = '49d6418ac680792a0e0bb4d5de97d0297de13085f9e66fbd4c996988b85f4583'
 
 
+def installed_sources():
+    import all
+    base=Path(all.__file__).resolve().parent
+    return {p.relative_to(base).as_posix():sha(p) for p in sorted(base.rglob('*.py'))}
+
+
 def parent_inputs(baseline):
     legacy, assets, variants = bridge.parent_inputs(baseline)
     root = ROOT/BRIDGE; q, report, receipt = (read(root/n) for n in ('request.json','report.json','receipt.json'))
@@ -76,6 +82,7 @@ def acceptance(path):
     path=inside(ROOT,path); q=read(path); d=path.parent
     r,receipt=read(d/'aggregate.json'),read(d/'aggregate_receipt.json')
     require(q['protocol']==SMOKE and q['source_hashes']==shared.sources() and q['environment']==shared.environment()
+        and q['dependencies']==installed_sources() and q['runtime_identity']==bridge.original.runtime_identity()
         and q['design_sha256']==sha(ROOT/DESIGN) and r['request_hash']==digest(q) and r['engineering_complete']
         and r['status']=='complete' and r['method_effect_gate'] is None and not r['method_comparison_allowed']
         and receipt['request_hash']==digest(q) and receipt['aggregate_sha256']==sha(d/'aggregate.json')
@@ -93,7 +100,8 @@ def prepare(config,baseline,run_id,entry_smoke=None):
     legacy,assets,binary,models,inventory=parent_inputs(baseline)
     q={**shared.metadata(),'version':'rcci04c_request_v1','protocol':p,'config_path':cp.relative_to(ROOT).as_posix(),
         'config_sha256':sha(cp),'design_sha256':sha(ROOT/DESIGN),'source_hashes':shared.sources(),
-        'environment':shared.environment(),'baseline_root':str(Path(baseline).resolve()),'assets':assets,
+        'environment':shared.environment(),'dependencies':installed_sources(),'runtime_identity':bridge.original.runtime_identity(),
+        'baseline_root':str(Path(baseline).resolve()),'assets':assets,
         'binary':binary,'legacy_request':legacy,'raw_training':models,'raw_inventory':inventory,
         'predictors':legacy['predictors'],'predictor_training_request':legacy['predictor_training_request'],
         'upstream_config_sha256':legacy['upstream_config_sha256'],
@@ -127,6 +135,7 @@ def load_request(path,expected):
     p=validate_protocol(q['protocol'])
     require(path.parent.parent==ROOT/'artifacts/rcci04c' and digest(q)==expected and q['version']=='rcci04c_request_v1'
         and q['source_hashes']==shared.sources() and q['environment']==shared.environment()
+        and q['dependencies']==installed_sources() and q['runtime_identity']==bridge.original.runtime_identity()
         and q['config_sha256']==sha(inside(ROOT,q['config_path'])) and read(inside(ROOT,q['config_path']))==p
         and q['design_sha256']==sha(ROOT/DESIGN) and q['train_jobs']==jobs(p,'train') and q['evaluation_jobs']==jobs(p,'evaluate')
         and q['preset']==raw.resolved_preset('cpu',.0002,smoke=p==SMOKE)
@@ -162,7 +171,9 @@ def training_metadata(q,root,*,publish=False):
     if publish:
         write_once(root/'training_index.json',index)
         write_once(root/'training_index_receipt.json',{'request_hash':digest(q),'index_sha256':sha(root/'training_index.json')})
-    elif (root/'training_index.json').exists(): require(read(root/'training_index.json')==index,'Frozen training index changed')
+    elif (root/'training_index.json').exists():
+        require(read(root/'training_index.json')==index and read(root/'training_index_receipt.json')=={
+            'request_hash':digest(q),'index_sha256':sha(root/'training_index.json')},'Frozen training index/receipt changed')
     return result
 
 
