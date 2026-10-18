@@ -30,7 +30,7 @@ prepare不启动训练；必须先有同源码已通过的入口smoke。正式�
 - 评价4组各1回合、simulator seed200：新RCCI用smoke权重，Raw只读原120k权重。
   两者训练预算不同，禁止汇总成方法收益表；只检验加载/执行/终止与封存。
 - 共6个新进程session，上限36个episode、3,030控制步、6,702 simulationStep，
-  3,030 ensemble/9,090 member forward、3,066 policy forward；每worker watchdog180s。
+  3,030 ensemble/9,090 member forward、5,158 policy forward；每worker watchdog180s。
 - 实际非terminal观测、预测调用与控制step对齐；原ST诊断guard保持0调用。
   每个session有原生step计数上限；checkpoint/optimizer/replay保存计数及初始化验证。
 - Raw评价与对应旧记录精确比较；RCCI预测冻结，policy至少发生一次真实优化，
@@ -40,3 +40,8 @@ prepare不启动训练；必须先有同源码已通过的入口smoke。正式�
 训练run的resume仅复用sealed complete整job，不恢复中断优化器或replay。
 同请求已完成的阶段可跳过完整job；失败/部分目录保留并报错。
 实现、测试、smoke验收、运行文档与原子提交完成后才交接正式命令。
+
+运行前计数勘误：初稿3,066只计行为policy，漏计原DDPG的policy优化与target-policy。
+每训练job最多531次act、523次原更新，policy合计531+2×523=1,577；
+两个训练job加四个eval的上限为2×1,577+4×501=5,158。
+这是运行前静态源码核查的计数修正，不增加训练/更新次数或任何仿真/预测预算。
