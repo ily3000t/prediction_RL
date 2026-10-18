@@ -34,6 +34,7 @@ from prediction_rl.features.probe_features import FrozenProbeFeatures
 from prediction_rl.features.road_consequences_v2 import contract
 from prediction_rl.training import all_ddpg as raw, rcci_ddpg as rcci
 from prediction_rl.training.matched_learning_curve import Jsonl
+from prediction_rl.training.policy_forward_audit import PolicyForwardCounter
 from prediction_rl.evaluation.rcci_interface_coverage import InterfaceCoverage
 from prediction_rl.evaluation.rcci_matched_policy import PROTOCOL, SMOKE, validate_protocol, jobs, aggregate
 
@@ -203,7 +204,8 @@ class Runtime:
     def __init__(self,q,j,stage,out,root):
         self.q,self.job,self.stage,self.out,self.root=q,j,stage,out,root
         self.profile=q['protocol']; self.small=self.profile==SMOKE
-        self.providers=[]; self.guards=[]; self.hooks=[]; self.steps=0; self.policy_calls=0
+        self.providers=[]; self.guards=[]; self.hooks=[]; self.steps=0
+        self.policy_counter=PolicyForwardCounter((1577 if stage=='train' else 501) if self.small else None)
         self.diag=InterfaceCoverage(); self.stream=Jsonl(out/'interface_events.jsonl.gz')
         self.initial_ok=False; self.started=time.perf_counter()
         self.source=ROOT/'RL-MPC-LaneMerging-master'
@@ -255,14 +257,10 @@ class Runtime:
                 model=self.job['id'].removeprefix('rcci_')
                 require(initial==self.q['raw_training'][model]['initial_weight_sha256'],'Expanded initialization differs before training')
                 self.initial_ok=True; write_once(self.out/'initialization.json',{'matches_legacy_expanded':True,'hashes':initial})
-            def count(module,inputs):
-                limit=1577 if self.stage=='train' else 501
-                if self.small and self.policy_calls>=limit: raise ValueError('Entry policy forward cap exceeded')
-                self.policy_calls+=1
-            self.hooks.append(checked.agent.policy.model.register_forward_pre_hook(count))
             target=checked.agent.policy._target._target
             require(isinstance(target,torch.nn.Module),'Unexpected original policy target implementation')
-            self.hooks.append(target.register_forward_pre_hook(count))
+            self.hooks.append(checked.agent.policy.model.register_forward_pre_hook(self.policy_counter))
+            self.hooks.append(target.register_forward_pre_hook(self.policy_counter))
             return checked
         return build
 
@@ -289,7 +287,7 @@ class Runtime:
     def summary(self):
         calls=sum(p.calls if isinstance(p,rcci.MatchedRCCIProvider) else p.model.calls for p in self.providers)
         return {'actual_simulation_steps':self.steps,'ensemble_forward_calls':calls,'member_forward_calls':calls*3,
-            'policy_forward_calls':self.policy_calls,'st_calls':[n for g in self.guards for n in g.calls],
+            'policy_forward_calls':self.policy_counter.calls,'st_calls':[n for g in self.guards for n in g.calls],
             'interface_coverage':self.diag.report()}
 
 
@@ -351,8 +349,13 @@ def run(path,expected,stage,resume=False):
                 print('[rcci04c] '+stage+' '+j['id'],flush=True)
                 cmd=[sys.executable,'-B',str(Path(__file__).resolve()),'worker','--request',str(Path(path).resolve()),
                      '--confirm-request-hash',expected,'--stage',stage,'--job',j['id']]
-                with (invocation/(j['id']+'.log')).open('xb') as log:
-                    subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=180 if p==SMOKE else None)
+                log_path=invocation/(j['id']+'.log')
+                try:
+                    with log_path.open('xb') as log:
+                        subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=180 if p==SMOKE else None)
+                except subprocess.CalledProcessError as error:
+                    raise RuntimeError(f"RCCI {stage} job {j['id']} failed (exit {error.returncode}); "
+                        f"inspect child log: {log_path}; partial output is preserved, not resumable") from error
                 audit.sealed(root/stage/j['id'],binding(q,stage,j)); return {'id':j['id'],'action':'run'}
             width=p['training' if stage=='train' else 'evaluation']['workers']
             with ThreadPoolExecutor(max_workers=width) as pool:

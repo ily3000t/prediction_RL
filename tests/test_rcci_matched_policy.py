@@ -1,6 +1,8 @@
 from copy import deepcopy
 import json
+import pickle
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
 import sys
 
@@ -19,6 +21,7 @@ from prediction_rl.evaluation.rcci_matched_policy import PROTOCOL,SMOKE,jobs,agg
 from prediction_rl.evaluation.matched_learning_curve import METRICS
 from prediction_rl.data.collection_store import write_once,seal_episode
 import train_rcci_matched_ddpg as cli
+from prediction_rl.training.policy_forward_audit import PolicyForwardCounter
 
 
 def env(arm):
@@ -157,3 +160,69 @@ def test_changed_installed_sources_rejected_before_assets(tmp_path,monkeypatch):
     monkeypatch.setattr(cli,'read',lambda *a:q)
     monkeypatch.setattr(cli,'sha',lambda *a:pytest.fail('Assets opened for changed installed algorithm'))
     with pytest.raises(ValueError): cli.load_request(tmp_path/'artifacts/rcci04c/stale/request.json',cli.digest(q))
+
+
+def test_forward_counter_pickle_cap_and_no_rng_side_effects():
+    counter=PolicyForwardCounter(2); rng=torch.get_rng_state().clone()
+    assert counter(None,()) is None
+    restored=pickle.loads(pickle.dumps(counter)); assert restored.calls==1 and restored.limit==2
+    assert restored(None,()) is None
+    with pytest.raises(ValueError,match='forward cap'): restored(None,())
+    assert restored.calls==2 and torch.equal(rng,torch.get_rng_state())
+    with pytest.raises(ValueError): PolicyForwardCounter(0)
+
+
+@pytest.mark.parametrize('arm',['rcci_ordinary','rcci_conditional'])
+def test_runtime_hooks_cross_original_periodic_save_without_changing_learning(tmp_path,arm):
+    """Exercise actual ALL save frequency; the old 16-step SUMO smoke missed it."""
+    torch.set_num_threads(1)
+    def execute(instrumented):
+        directory=tmp_path/('audited' if instrumented else 'plain'); directory.mkdir()
+        writer=DummyWriter(); writer.log_dir=str(directory)
+        torch.manual_seed(871); np.random.seed(871)
+        rt=None
+        if instrumented:
+            rt=object.__new__(cli.Runtime); rt.job={'arm':arm}; rt.stage='evaluate'
+            rt.policy_counter=PolicyForwardCounter(); rt.hooks=[]
+            checked=rt.factory('cpu',.0002,smoke=True)(env(arm),writer)
+        else:
+            checked=rcci.preset_factory('cpu',.0002,smoke=True)(env(arm),writer)
+        frequency=checked.agent.policy._checkpointer.frequency
+        assert frequency==checked.agent.q._checkpointer.frequency==200
+        actions=[]
+        for i in range(frequency+40):
+            state=State(torch.linspace(-1,1,169).view(1,169)+i*.001,
+                torch.tensor([int(i%8!=7)],dtype=torch.uint8),[{}])
+            actions.append(checked.act(state,-.1).clone())
+        # Both untouched ALL checkpointers really serialized the full model.
+        assert all((directory/(n+'.pt')).stat().st_size>1000 for n in ('policy','q'))
+        assert checked.agent.policy._checkpointer._updates>frequency
+        return checked,actions,torch.get_rng_state().clone(),deepcopy(np.random.get_state()),rt,directory
+    plain,pa,pr,pn,_,_=execute(False)
+    checked,actions,rng,nrng,rt,directory=execute(True)
+    assert all(torch.equal(a,b) for a,b in zip(pa,actions)) and torch.equal(pr,rng)
+    assert pn[0]==nrng[0] and pn[2:]==nrng[2:]
+    np.testing.assert_array_equal(pn[1],nrng[1])
+    assert rt.policy_counter.calls>len(actions)  # Includes policy update and target forwards.
+    for name in ('policy','q'):
+        a,b=getattr(plain.agent,name),getattr(checked.agent,name)
+        for k,v in a.model.state_dict().items(): assert torch.equal(v,b.model.state_dict()[k])
+        for k,v in a._target._target.state_dict().items(): assert torch.equal(v,b._target._target.state_dict()[k])
+        assert a._optimizer.state_dict()['param_groups']==b._optimizer.state_dict()['param_groups']
+        for k,values in a._optimizer.state_dict()['state'].items():
+            for n,v in values.items(): assert torch.equal(v,b._optimizer.state_dict()['state'][k][n])
+    # Hooks on target models must also serialize; test importability in a fresh interpreter.
+    torch.save(checked.agent.policy._target._target,directory/'target.pt')
+    child="""import sys,torch
+sys.path.insert(0,sys.argv[1])
+from prediction_rl.training.policy_forward_audit import PolicyForwardCounter
+for path in sys.argv[2:]:
+    model=torch.load(path,map_location='cpu',weights_only=False)
+    assert len(model._forward_pre_hooks)==1
+    hook=next(iter(model._forward_pre_hooks.values()))
+    assert isinstance(hook,PolicyForwardCounter) and hook.calls>0 and hook.limit is None
+    assert all(torch.isfinite(v).all() for v in model.state_dict().values())
+"""
+    subprocess.run([sys.executable,'-B','-c',child,str(ROOT/'src'),
+        str(directory/'policy.pt'),str(directory/'target.pt')],check=True,timeout=60)
+    for handle in rt.hooks: handle.remove()
